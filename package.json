@@ -1,0 +1,29 @@
+{
+  "name": "stellarhub",
+  "version": "1.0.0",
+  "description": "Lanzador de juegos para Linux inspirado en PlayNite",
+  "main": "dist/main/main.js",
+  "scripts": {
+    "build:main": "tsc -p tsconfig.main.json",
+    "build:renderer": "vite build",
+    "build": "npm run build:main && npm run build:renderer",
+    "watch:main": "tsc -p tsconfig.main.json --watch",
+    "watch:renderer": "vite",
+    "dev": "concurrently \"npm run watch:main\" \"npm run watch:renderer\" --kill-others --success first",
+    "start": "cross-env NODE_ENV=development electron .",
+    "watch": "concurrently \"npm run watch:main\" \"npm run watch:renderer\" \"wait-on dist/main/main.js && cross-env NODE_ENV=development electron .\""
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "concurrently": "^9.0.0",
+    "cross-env": "^7.0.3",
+    "electron": "^35.0.0",
+    "typescript": "^6.0.0",
+    "vite": "^6.0.0",
+    "wait-on": "^8.0.0"
+  },
+  "dependencies": {},
+  "keywords": ["games", "launcher", "linux", "proton"],
+  "author": "Tu Nombre",
+  "license": "GPL-3.0"
+}
