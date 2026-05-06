@@ -4,8 +4,6 @@ import { GameType } from "./enums";
 export interface GameSummary {
   id: string;
   title: string;
-  coverImage?: string;
-  gridImage?: string;
   developer?: string;
   releaseYear?: number;
   isInstalled: boolean;
@@ -16,9 +14,8 @@ export interface GameSummary {
   description?: string;
   publishers?: string[];
   genres?: string[];
-  bannerImage?: string;
-  backgroundImage?: string;
   source: GameType;
+  gameImages: GameImages;
 }
 
 // LaunchConfig sigue igual, pero NUNCA se envía al frontend fuera de edición
@@ -40,6 +37,13 @@ export interface LaunchConfig {
 // Solo se envía al frontend cuando se abre la vista de edición o detalles
 export interface GameDetail extends GameSummary {
   launchConfig: LaunchConfig;  // solo visible en edición
+}
+
+export interface GameImages {
+  grid: string; // ruta absoluta al grid
+  cover: string; // ruta absoluta a la portada
+  banner: string; // ruta absoluta al banner
+  background: string; // ruta absoluta al fondo
 }
 
 export interface AppSettings {

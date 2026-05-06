@@ -43,22 +43,51 @@ export async function initAddGameModal() {
                 });
             }
         };
+        closeBtn();
 
         const form = dialog.querySelector('#manual-game-form') as HTMLFormElement;
         form?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const gameData = extractGameDataFromForm(form);
-            const result = await window.electronAPI.invoke('add-manual-game', gameData);
-            if (result.success) {
-                dialog.close();
-                form.reset();
-                window.dispatchEvent(new CustomEvent('games-updated'));
-            } else {
-                alert('Error: ' + result.error);
+            const createResult = await window.electronAPI.invoke('add-manual-game', gameData);
+            if (!createResult.success) {
+                alert('Error: ' + createResult.error);
+                return;
+
             }
+
+
+            // Si hay archivo de imagen seleccionado, lo guardamos
+            const fileInput = document.getElementById('gridImageFile') as HTMLInputElement;
+            if (fileInput.files && fileInput.files[0]) {
+                const newGameId = createResult.gameId;
+                saveImage(newGameId, fileInput.files[0]);
+            }
+
+            window.dispatchEvent(new CustomEvent('games-updated'));
+            dialog.close();
+            form.reset();
         });
 
-        closeBtn();
+    }
+
+    function saveImage(gameID: string, file: File) {
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+            const arrayBuffer = ev.target?.result as ArrayBuffer;
+            const buffer = Buffer.from(arrayBuffer);
+            const ext = file.name.split('.').pop() || 'png';
+            const savedPath = await window.electronAPI.invoke('save-grid-image-buffer', {
+                gameId: gameID,
+                buffer: Array.from(buffer), // Enviar como array para serialización
+                ext
+            });
+            if (savedPath) {
+                // Actualizar el juego con la ruta de imagen
+                await window.electronAPI.invoke('update-game-image', { gameId: gameID, imagePath: savedPath, imageType: 'grid' });
+            }
+        };
+        reader.readAsArrayBuffer(file);
     }
 
     function showLoading(dialog: HTMLDialogElement, isLoading: boolean) {

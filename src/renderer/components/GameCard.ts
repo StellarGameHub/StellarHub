@@ -40,7 +40,7 @@ export class GameCard extends HTMLElement {
         this.querySelector('.game-title')!.textContent = game.title;
         //Game Cover
         const img = this.querySelector('.game-cover') as HTMLImageElement;
-        img.src = game.coverImage || '/assets/default-cover.png';
+        img.src = game.gameImages?.cover || '/assets/default-cover.png';
         img.alt = game.title;
         //Game Developer
         if (game.developer) {
