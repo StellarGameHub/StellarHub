@@ -15,15 +15,19 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "concurrently": "^9.0.0",
+    "concurrently": "^9.2.1",
     "cross-env": "^7.0.3",
-    "electron": "^35.0.0",
+    "electron": "^41.5.0",
     "typescript": "^6.0.0",
     "vite": "^6.0.0",
     "wait-on": "^8.0.0"
   },
-  "dependencies": {},
-  "keywords": ["games", "launcher", "linux", "proton"],
+  "keywords": [
+    "games",
+    "launcher",
+    "linux",
+    "proton"
+  ],
   "author": "Tu Nombre",
   "license": "GPL-3.0"
 }

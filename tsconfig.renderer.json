@@ -5,7 +5,8 @@
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "outDir": "./dist/renderer",
-    "rootDir": "./src/renderer"
+    "rootDir": "./src/renderer",
+    "types": ["vite/client"]
   },
   "include": ["src/renderer/**/*"]
 }

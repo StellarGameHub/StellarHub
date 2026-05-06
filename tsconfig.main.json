@@ -3,9 +3,9 @@
   "compilerOptions": {
     "module": "Node16",
     "moduleResolution": "Node16",
-    "outDir": "./dist/main",
+    "outDir": "./dist",
     "rootDir": "./src",
-    "types": ["node"]
+    "types": ["node","vite/client"]
   },
   "include": ["src/main/**/*", "src/preload/**/*"],
   "exclude": ["src/renderer"]

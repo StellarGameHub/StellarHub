@@ -1,0 +1,35 @@
+:root {
+  --bg-color: #0b0e14;
+  --card-bg: #1e1e2e;
+  --text-color: #cfd8e6;
+  --accent: #2c3e66;
+  --accent-hover: #3e5a8a;
+  --border-radius: 12px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+  padding: 2rem;
+}
+
+button {
+  background: var(--accent);
+  border: none;
+  padding: 0.5rem 1rem;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+button:hover {
+  background: var(--accent-hover);
+}

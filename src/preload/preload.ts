@@ -1,6 +1,6 @@
-import { contextBridge } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
 
 // Exponemos APIs seguras al renderer
 contextBridge.exposeInMainWorld('electronAPI', {
-  // Ejemplo: getSteamGames: () => ipcRenderer.invoke('get-steam-games')
+  invoke: (channel: string, data?: any) => ipcRenderer.invoke(channel, data),  
 });

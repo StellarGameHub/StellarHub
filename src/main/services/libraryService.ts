@@ -29,12 +29,8 @@ export async function getGames(): Promise<GameDetail[]> {
     }
 }
 
-async function saveGames(games: GameDetail[]): Promise<void> {
-    const filePath = getGamesFilePath();
-    await fs.writeFile(filePath, JSON.stringify(games, null, 2));
-}
 
-export async function getGame(id: string): Promise<GameDetail | undefined> {
+export async function getGameData(id: string): Promise<GameDetail | undefined> {
     const games = await getGames();
     return games.find(game => game.id === id);
 }
@@ -50,8 +46,25 @@ export async function saveGame(game: GameDetail): Promise<void> {
     await saveGames(games);
 }
 
-export async function updatePlaytime(gameId: string, additionalMinutes: number): Promise<void> {
-    const game = await getGame(gameId);
+async function saveGames(games: GameDetail[]): Promise<void> {
+    const filePath = getGamesFilePath();
+    await fs.writeFile(filePath, JSON.stringify(games, null, 2));
+}
+
+export async function deleteGame(gameID: string) {
+    const games = await getGames();
+    const gameIndex = games.findIndex(g => g.id == gameID)    
+
+    if (gameIndex === -1) {
+        console.warn(`attempt to delete non-existent game, with ID: ${gameID}`)
+    } else {
+        games.splice(gameIndex, 1);
+        await saveGames(games);
+    }
+}
+
+export async function updatePlaytime(gameID: string, additionalMinutes: number): Promise<void> {
+    const game = await getGameData(gameID);
     if (game) {
         game.playtimeMinutes += additionalMinutes;
         game.lastPlayedAt = new Date();
@@ -65,6 +78,6 @@ export async function updatePlaytime(gameId: string, additionalMinutes: number):
  * @returns La configuración de lanzamiento o undefined si el juego no existe
  */
 export async function getLaunchConfig(gameId: string): Promise<LaunchConfig | undefined> {
-    const game = await getGame(gameId);
+    const game = await getGameData(gameId);
     return game?.launchConfig;
 }

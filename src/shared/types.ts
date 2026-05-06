@@ -7,14 +7,20 @@ export interface GameSummary {
   developer?: string;
   releaseYear?: number;
   isInstalled: boolean;
+  isHidden: boolean;
   playtimeMinutes: number;
   lastPlayedAt?: Date;
+  addedAt?: Date;
   description?: string;
   publishers?: string[];
   genres?: string[];
   bannerImage?: string;
   backgroundImage?: string;
-  source: "manual" | "steam" | "gog" | "rom";
+  source: GameType;
+}
+
+export enum GameType {
+  manual, steam, rom
 }
 
 // Datos completos del juego (incluyendo configuración de lanzamiento)
@@ -31,6 +37,7 @@ export interface LaunchConfig {
   gameId?: string;
   store?: string;
   launchArgs?: string[];
+  gameArgs?: string[];
   enableMangoHud: boolean;
   enableGamescope: boolean;
   gamescopeArgs?: string[];
