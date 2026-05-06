@@ -44,7 +44,7 @@ export function setupFullscreenGamepad() {
   };
 
   // Iniciar escucha de gamepad con callbacks
-  startGamepadListening({ 
+  startGamepadListening({
     onDirectionChange: (dx, dy) => {
       // Movimiento horizontal (left stick X)
       if (Math.abs(dx) > 0.5) {
@@ -79,7 +79,7 @@ async function initFromSettings() {
   if (settings.launchInFullscreen) {
     // Activar fullscreen nativo y modo UI
     await document.documentElement.requestFullscreen();
-    setUIMode('fullscreen');    
+    setUIMode('fullscreen');
   } else {
     initAddGameModal(); // Inicializar modal de agregar juego
     setUIMode('desktop');
@@ -128,7 +128,7 @@ async function renderCurrentLayout() {
 }
 
 // Escuchar cambios de modo (fullscreen/desktop)
-onUIModeChange(() => {    
+onUIModeChange(() => {
   renderCurrentLayout();
 });
 
@@ -145,6 +145,9 @@ window.addEventListener('keydown', (e) => {
     toggleFullscreenUI();
   }
 });
-
+// Escuchar evento de actualización de juegos para re-renderizar
+window.addEventListener('games-updated', () => {
+  renderCurrentLayout();
+});
 
 initFromSettings();

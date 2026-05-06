@@ -1,10 +1,11 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, net, protocol } from 'electron';
 import { registerGameHandlers } from './ipc/games';
 import { registerProtonHandlers } from './ipc/proton';
 import { registerSettingsHandlers } from './ipc/settings';
 import { registerImageHandlers } from './ipc/images';
 
 import path from 'path';
+
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -27,6 +28,17 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  console.log('⚡ Backend iniciado correctamente');
+
+  // Registramos el protocolo personalizado para servir imágenes desde el sistema de archivos
+  protocol.handle('estelarhub', (request) => {
+    const url = new URL(request.url);
+    // url.pathname será algo como "/images/grid/abc.png"
+    const filePath = path.join(app.getPath('userData'), decodeURIComponent(url.pathname));
+    console.log(`Serving image from path: ${filePath}`);
+    return net.fetch('file://' + filePath);
+  });
+
   registerSettingsHandlers();
   registerGameHandlers();
   registerProtonHandlers();

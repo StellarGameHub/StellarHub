@@ -40,7 +40,7 @@ export class GameCard extends HTMLElement {
         this.querySelector('.game-title')!.textContent = game.title;
         //Game Cover
         const img = this.querySelector('.game-cover') as HTMLImageElement;
-        img.src = game.gameImages?.cover || '/assets/default-cover.png';
+        img.src = `estelarhub://${game.gameImages?.grid || '/assets/default-cover.png'}`;
         img.alt = game.title;
         //Game Developer
         if (game.developer) {
@@ -59,12 +59,11 @@ export class GameCard extends HTMLElement {
             window.electronAPI.invoke('launch-game-by-id', this.id);
         });
 
-        const deleteBtn = this.querySelector('.delete-button'); // Seleccionar el botón de eliminar
-        deleteBtn?.setAttribute('data-game-id', game.id); // Guardar el ID del juego en el dataset del botón
+        const deleteBtn = this.querySelector('.delete-button'); // Seleccionar el botón de eliminar        
         deleteBtn?.addEventListener('click', async (e) => {
             e.stopPropagation();
 
-            const result = await window.electronAPI.invoke('delete-game-by-id', this.id);
+            const result = await window.electronAPI.invoke('delete-game-by-id', game.id);
             if (result.success) {
                 window.dispatchEvent(new CustomEvent('games-updated'));
             } else {

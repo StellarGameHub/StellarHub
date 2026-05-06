@@ -54,7 +54,12 @@ export async function initAddGameModal() {
             let imageBuffer: ArrayBuffer | null = null;
             let imageExt: string | null = null;
 
+            if (fileInput.files && fileInput.files[0]) {
+                imageExt = fileInput.files[0].name.split('.').pop() || 'png';
+                imageBuffer = await fileInput.files[0].arrayBuffer(); // Leer el archivo como ArrayBuffer
+            }
             const gameData = extractGameDataFromForm(form);
+
             const createResult = await window.electronAPI.invoke('add-manual-game', { ...gameData, imageBuffer, imageExt });
             if (createResult.success) {
                 window.dispatchEvent(new CustomEvent('games-updated'));

@@ -20,8 +20,13 @@ export function registerGameHandlers() {
     });
 
     ipcMain.handle('add-manual-game', async (event, payload) => {
+        console.log('Received add-manual-game with payload:', payload);
         try {
             const { gameData, imageBuffer, imageExt } = payload;
+
+            console.log('Game data:', gameData);
+            console.log('Image buffer length:', imageBuffer ? imageBuffer.byteLength : 'No image');
+            console.log('Image extension:', imageExt);
 
             const newId = crypto.randomUUID();
 
