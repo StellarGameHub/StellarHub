@@ -1,4 +1,5 @@
-import { GameSummary } from '../../shared/types';
+import { GameDetail, GameSummary } from '../../shared/types';
+import gameCardHtml from '../templates/game-card.html?raw';
 
 declare global {
     interface Window {
@@ -9,23 +10,16 @@ declare global {
 }
 
 export class GameCard extends HTMLElement {
-    private gameId: string = '';
     private gameData: GameSummary | null = null;
 
-    static get observedAttributes() {
-        return ['game-id'];
-    }
-
-    attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-        if (name === 'game-id' && newValue !== oldValue) {
-            this.gameId = newValue;
-            this.loadGameData();
-        }
+    set game(value: GameSummary) {
+        this.gameData = value;
+        this.render();
     }
 
     async loadGameData() {
         try {
-            this.gameData = await window.electronAPI.invoke('get-game-detail', this.gameId);
+            this.gameData = await window.electronAPI.invoke('get-game-detail', this.id);
             this.render();
         } catch (error) {
             console.error('Error loading game data:', error);
@@ -40,37 +34,42 @@ export class GameCard extends HTMLElement {
         }
 
         const game = this.gameData;
-        this.innerHTML = `
-      <div class="game-card">
-        <div class="game-card-inner">
-          <img class="game-cover" src="${game.coverImage || '/assets/default-cover.png'}" alt="${game.title}">
-          <div class="game-info">
-            <h3 class="game-title">${game.title}</h3>
-            <p class="game-developer">${game.developer || ''}</p>
-            <p class="game-year">${game.releaseYear || ''}</p>
-            <button class="play-button" data-id="${this.gameId}">▶️ Jugar</button>
-            <button class="delete-button" data-id="${this.gameId}">❌ Eliminar</button>
-          </div>
-        </div>
-      </div>
-    `;
+        this.innerHTML = gameCardHtml;
+        //Llenar datos del juego en el template
+        //Game Title
+        this.querySelector('.game-title')!.textContent = game.title;
+        //Game Cover
+        const img = this.querySelector('.game-cover') as HTMLImageElement;
+        img.src = game.coverImage || '/assets/default-cover.png';
+        img.alt = game.title;
+        //Game Developer
+        if (game.developer) {
+            this.querySelector('.game-developer')!.textContent = game.developer
+        }
+        //Game Year
+        if (game.releaseYear) {
+            this.querySelector('.game-year')!.textContent = game.releaseYear.toString();
+        }
 
         // Vincular eventos al botón
-        const playBtn = this.querySelector('.play-button');
-        playBtn?.addEventListener('click', (e) => {
+        const playBtn = this.querySelector('.play-button'); // Seleccionar el botón de jugar
+        playBtn?.setAttribute('data-game-id', game.id); // Guardar el ID del juego en el dataset del botón
+        playBtn?.addEventListener('click', (e) => { // Agregar listener al botón de jugar
             e.stopPropagation();
-            window.electronAPI.invoke('launch-game-by-id', this.gameId);
+            window.electronAPI.invoke('launch-game-by-id', this.id);
         });
-        const deleteBtn = this.querySelector('.delete-button');
+
+        const deleteBtn = this.querySelector('.delete-button'); // Seleccionar el botón de eliminar
+        deleteBtn?.setAttribute('data-game-id', game.id); // Guardar el ID del juego en el dataset del botón
         deleteBtn?.addEventListener('click', async (e) => {
             e.stopPropagation();
 
-            const result = await window.electronAPI.invoke('delete-game-by-id', this.gameId);
+            const result = await window.electronAPI.invoke('delete-game-by-id', this.id);
             if (result.success) {
                 window.dispatchEvent(new CustomEvent('games-updated'));
             } else {
                 alert('Error: ' + result.error);
-            }            
+            }
 
         });
     }

@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import { registerGameHandlers } from './ipc/games';
 import { registerProtonHandlers } from './ipc/proton';
+import { registerSettingsHandlers } from './ipc/settings';
 import path from 'path';
 
 function createWindow() {
@@ -24,6 +25,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  registerSettingsHandlers();
   registerGameHandlers();
   registerProtonHandlers();
   createWindow();

@@ -1,7 +1,8 @@
 import { ipcMain } from 'electron';
 import { getGames, getGameData, saveGame, getLaunchConfig, updatePlaytime, deleteGame } from '../services/libraryService';
 import { launchManualGame } from '../services/gameLauncher';
-import { GameDetail, GameType } from '../../shared/types';
+import { GameDetail } from '../../shared/types';
+import { GameType } from '../../shared/enums';
 
 export function registerGameHandlers() {
     ipcMain.handle('get-games-summary', async () => {
