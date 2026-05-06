@@ -1,8 +1,9 @@
 import { ipcMain } from 'electron';
-import { getGames, getGameData, saveGame, getLaunchConfig, updatePlaytime, deleteGame } from '../services/libraryService';
-import { launchManualGame } from '../services/gameLauncher';
-import { GameDetail } from '../../shared/types';
 import { GameType } from '../../shared/enums';
+import { GameDetail } from '../../shared/types';
+import { saveGameImage } from '../services/imageService';
+import { launchManualGame } from '../services/gameLauncher';
+import { getGames, getGameData, saveGame, getLaunchConfig, updatePlaytime, deleteGame } from '../services/libraryService';
 
 export function registerGameHandlers() {
     ipcMain.handle('get-games-summary', async () => {
@@ -18,16 +19,29 @@ export function registerGameHandlers() {
         return { success: true };
     });
 
-    ipcMain.handle('add-manual-game', async (event, gameData: Omit<GameDetail, 'id' | 'addedAt' | 'playtimeMinutes'>) => {
+    ipcMain.handle('add-manual-game', async (event, payload) => {
         try {
-            const newId = `manual-${Date.now()}`;
+            const { gameData, imageBuffer, imageExt } = payload;
+
+            const newId = crypto.randomUUID();
+
+            let gridImagePath = '';
+
+            if (imageBuffer && imageExt) {
+                gridImagePath = await saveGameImage(newId, imageBuffer, imageExt, 'grid');
+            }
+
             const newGame: GameDetail = {
                 ...gameData,
                 id: newId,
                 addedAt: new Date(),
                 playtimeMinutes: 0,
                 source: GameType.manual,
+                gameImages: {
+                    grid: gridImagePath,
+                }
             };
+
             await saveGame(newGame);
             return { success: true, gameId: newId };
         } catch (error) {
