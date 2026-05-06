@@ -40,16 +40,30 @@ export async function deleteGameImage(gameId: string, type: 'grid' | 'cover' | '
 }
 
 // Nueva función para guardar imagen a partir de un buffer (usada al crear juego con imagen)
-export async function saveGameImage(gameId: string, imageBuffer: Uint8Array, imageExt: string, imageType: 'grid' | 'cover' | 'banner'): Promise<string> {
+
+export async function saveGameImage(
+    gameId: string,
+    imageBuffer: Uint8Array,
+    imageExt: string,
+    imageType: 'grid' | 'cover' | 'banner'
+): Promise<string> {
     try {
+        // Carpeta destino completa
+        const imagesDir = path.join(app.getPath('userData'), 'images', imageType);
+        // Crear directorio si no existe (recursivo por si faltan 'images' también)
+        await fs.mkdir(imagesDir, { recursive: true });
 
-        const relativePath = path.join('images', imageType, `${gameId}.${imageExt}`);
-        const fullPath = path.join(app.getPath('userData'), relativePath);
+        // Ruta relativa para guardar en la base de datos
+        const fileName = `${gameId}.${imageExt}`;
+        const relativePath = path.join('images', imageType, fileName);
+        const fullPath = path.join(imagesDir, fileName);
+
         await fs.writeFile(fullPath, Buffer.from(imageBuffer));
+        console.log(`Imagen guardada en: ${fullPath}`);
 
-        return relativePath; // Devolvemos la ruta relativa para almacenar en el juego
+        return relativePath;
     } catch (err) {
-        console.error(`Error updating image for game ${gameId} of type ${imageType}:`, err);
+        console.error(`Error saving image for game ${gameId} (${imageType}):`, err);
         throw err;
     }
 }
