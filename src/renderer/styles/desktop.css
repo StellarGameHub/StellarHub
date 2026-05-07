@@ -1,0 +1,31 @@
+.theme-desktop {
+  /* COLORS */
+  --bg-color: #1e1e1e;
+  --text-color: #cfd8e6;
+  --accent: #2c3e66;
+  --accent-hover: #3e5a8a;
+
+  --border-radius: 12px;
+
+
+  --card-width: 10rem;
+  --card-bg: #77353575;
+}
+
+
+.ds-grid {
+  width: 50%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
+  gap: 20px;
+}
+
+.ds-details-panel {
+  background: var(--bg-color);
+  background-color: red;
+  color: var(--text-color);
+  width: 50%;
+  height: 100%;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+}

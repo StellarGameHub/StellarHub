@@ -1,25 +1,25 @@
 import { GameSummary } from '../../shared/types';
+import { GameCard } from '../components/shared/GameCard';
 import fullscreenLayoutHTML from './fullscreen-layout.html?raw';
 
-export function renderFullscreenLayout(games: GameSummary[], onPlayGame: (id: string) => void) {
-    const container = document.createElement('div');
-    container.className = 'fs-layout';
-    container.innerHTML = fullscreenLayoutHTML;
+export function renderFullscreenLayout(games: GameSummary[]): DocumentFragment {
+    const template = document.createElement('template');
+    template.innerHTML = fullscreenLayoutHTML;
 
-    const grid = container.querySelector('#fs-grid') as HTMLElement;
+    const content = template.content;
+
+    const grid = content.querySelector('#fs-grid') as HTMLElement;
+
     games.forEach(game => {
-        const card = document.createElement('div');
-        card.className = 'fs-game-card';
-        card.setAttribute('data-id', game.id);
-        card.innerHTML = `
-      <img src="${game.gameImages?.cover || '/assets/default-cover.png'}" alt="${game.title}">
-      <span>${game.title}</span>
-    `;
-        card.addEventListener('click', () => onPlayGame(game.id));
+        console.log('Rendering game:', game.title);
+        const card = document.createElement('game-card') as GameCard;
+        card.dataset.id = game.id; // Guardar ID para referencia futura
+        card.game = game; // Esto asigna el juego y llama a render() dentro del componente
+        console.log('Created card for game:', game.title, 'card element:', card);
         grid.appendChild(card);
     });
 
-    const exitBtn = container.querySelector('#btn-toggle-fs') as HTMLButtonElement;
+    const exitBtn = content.querySelector('#btn-toggle-fs') as HTMLButtonElement;
     exitBtn.addEventListener('click', () => {
         // Salir del fullscreen (desde uiMode)
         import('../services/uiMode').then(({ toggleFullscreenUI }) => {
@@ -27,5 +27,5 @@ export function renderFullscreenLayout(games: GameSummary[], onPlayGame: (id: st
         });
     });
 
-    return container;
+    return content;
 }

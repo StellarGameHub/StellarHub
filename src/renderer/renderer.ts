@@ -8,15 +8,19 @@ import { getUIMode, onUIModeChange, toggleFullscreenUI } from './services/uiMode
 import { renderDesktopLayout } from './layouts/DesktopLayout'; // Importar función para renderizar el layout de escritorio
 import { renderFullscreenLayout } from './layouts/FullscreenLayout'; // Importar función para renderizar el layout de fullscreen
 import { setUIMode } from './services/uiMode'; // Funcion para setear el modo UI desde la configuración
-import { initAddGameModal } from './components/AddGameModal'; // Inicializar modal de agregar juego
+import { initAddGameModal } from './components/desktop/AddGameModal'; // Inicializar modal de agregar juego
 import { startGamepadListening, stopGamepadListening } from './services/gamepad'; // Funciones para manejar gamepad
 
 //Cargar estilos globales
 import './styles/base.css';
 import './styles/fullscreen.css';
+import './styles/desktop.css';
 import './styles/components/game-card.css';
 import './styles/components/modal.css';
-import './styles/components/grid.css';
+
+//Cargar componentes
+import  './components/shared/GameCard';
+
 
 // Configuración específica del gamepad para el modo fullscreen (se llama cada vez que se entra a ese modo)
 let currentSelectedIndex = 0;
@@ -31,7 +35,7 @@ export function setupFullscreenGamepad() {
 
   // Función para actualizar la selección visual (se re-ejecuta tras re-render)
   const updateSelection = () => {
-    const cards = document.querySelectorAll('.fs-game-card');
+    const cards = document.querySelectorAll('.game-card');
     cards.forEach((card, idx) => {
       if (idx === currentSelectedIndex) card.classList.add('selected');
       else card.classList.remove('selected');
@@ -77,17 +81,17 @@ export function setupFullscreenGamepad() {
 async function initFromSettings() {
   const settings = await window.electronAPI.invoke('get-settings');
   if (settings.launchInFullscreen) {
+    console.log('Launching in fullscreen mode');
     // Activar fullscreen nativo y modo UI
     await document.documentElement.requestFullscreen();
     setUIMode('fullscreen');
   } else {
-    initAddGameModal(); // Inicializar modal de agregar juego
+    console.log('Launching in desktop mode');
     setUIMode('desktop');
   }
   renderCurrentLayout(); // ahora renderiza con el modo inicial
 }
 
-let currentLayout: HTMLElement | null = null;
 
 // Función para obtener juegos desde el backend
 async function fetchGames() {
@@ -104,27 +108,30 @@ async function launchGame(gameId: string) {
   }
 }
 
+let currentLayout: DocumentFragment | null = null;
+
 // Renderiza el layout según el modo actual
 async function renderCurrentLayout() {
+  console.log('Rendering layout for mode:', getUIMode());
   const games = await fetchGames();
   const mode = getUIMode();
-  const appContainer = document.getElementById('app-container') || document.body;
+  const appContainer = document.querySelector('#div-app') as HTMLElement;
 
-  // Limpiar layout anterior
-  if (currentLayout) {
-    appContainer.removeChild(currentLayout);
-  }
 
   if (mode === 'desktop') {
-    currentLayout = renderDesktopLayout(games, launchGame);
+    currentLayout = renderDesktopLayout(games);
+    appContainer.replaceChildren(currentLayout);
+
     stopGamepadListening(); // Aseguramos que el gamepad no escuche en modo escritorio
+    initAddGameModal(); // Inicializar modal de agregar juego (solo en desktop)
   } else {
-    currentLayout = renderFullscreenLayout(games, launchGame);
+    currentLayout = renderFullscreenLayout(games);
+    appContainer.replaceChildren(currentLayout);
+
     // Configurar gamepad solo en modo fullscreen
     setupFullscreenGamepad();
   }
 
-  appContainer.appendChild(currentLayout);
 }
 
 // Escuchar cambios de modo (fullscreen/desktop)
@@ -149,5 +156,6 @@ window.addEventListener('keydown', (e) => {
 window.addEventListener('games-updated', () => {
   renderCurrentLayout();
 });
+
 
 initFromSettings();

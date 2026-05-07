@@ -23,6 +23,7 @@ export async function toggleFullscreenUI() {
   if (!document.fullscreenElement) {
     await document.documentElement.requestFullscreen();
     setUIMode('fullscreen');
+    
   } else {
     await document.exitFullscreen();
     setUIMode('desktop');

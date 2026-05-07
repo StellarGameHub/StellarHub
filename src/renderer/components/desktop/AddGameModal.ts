@@ -1,10 +1,15 @@
-import modalHtml from '../templates/modal-add-game.html?raw';
+import modalHtml from '../../templates/modal-add-game.html?raw';
 
 let modalInstance: HTMLDialogElement | null = null;
 let protonVersionsCache: any[] | null = null;  // Cache de versiones
 
 export async function initAddGameModal() {
+    console.log('Initializing Add Game Modal');
+    
     if (!modalInstance) {
+
+        console.log('Creating modal instance');
+
         const dialog = document.createElement('dialog');
         dialog.id = 'add-game-modal';
         dialog.innerHTML = `
@@ -70,20 +75,6 @@ export async function initAddGameModal() {
             }
         });
 
-    }
-
-    function saveImage(gameID: string, file: File) {
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-            const arrayBuffer = ev.target?.result as ArrayBuffer;
-            const ext = file.name.split('.').pop() || 'png';
-            const savedPath = await window.electronAPI.invoke('save-grid-image-buffer', {
-                gameId: gameID,
-                buffer: arrayBuffer,      // Enviamos el ArrayBuffer directamente
-                ext: ext
-            });
-        };
-        reader.readAsArrayBuffer(file);
     }
 
     function showLoading(dialog: HTMLDialogElement, isLoading: boolean) {

@@ -1,11 +1,10 @@
 
-import '../components/GameCard';   // esto ejecuta el código que hace customElements.define
 import { GameSummary } from '../../shared/types';
+import { GameCard } from '../components/shared/GameCard';
 import desktopLayoutHTML from './desktop-layout.html?raw';
-import { GameCard } from '../components/GameCard';
 
 
-export function renderDesktopLayout(games: GameSummary[], onPlayGame: (id: string) => void) {
+export function renderDesktopLayout(games: GameSummary[]): DocumentFragment {
 
 
     // Agregar juegos de prueba
@@ -20,10 +19,12 @@ export function renderDesktopLayout(games: GameSummary[], onPlayGame: (id: strin
     //     source: 0, // GameType.manual
     // });
 
-    const container = document.createElement('div');
-    container.innerHTML = desktopLayoutHTML;
+    const template = document.createElement('template');
+    template.innerHTML = desktopLayoutHTML;    
 
-    const grid = container.querySelector('#ds-grid') as HTMLElement;
+    const content = template.content;
+
+    const grid = content.querySelector('#ds-grid') as HTMLElement;
 
     console.log('Games to render:', games);
 
@@ -35,7 +36,7 @@ export function renderDesktopLayout(games: GameSummary[], onPlayGame: (id: strin
         grid.appendChild(card);
     });
 
-    const fullscreenBtn = container.querySelector('.button-toggle-fullscreen') as HTMLButtonElement;
+    const fullscreenBtn = content.querySelector('.button-toggle-fullscreen') as HTMLButtonElement;
     fullscreenBtn.addEventListener('click', () => {
         // Entrar al modo fullscreen (desde uiMode)
         import('../services/uiMode').then(({ toggleFullscreenUI }) => {
@@ -43,5 +44,5 @@ export function renderDesktopLayout(games: GameSummary[], onPlayGame: (id: strin
         });
     });
 
-    return container;
+    return content;
 }

@@ -1,5 +1,5 @@
-import { GameDetail, GameSummary } from '../../shared/types';
-import gameCardHtml from '../templates/game-card.html?raw';
+import { GameSummary } from '../../../shared/types';
+import gameCardHtml from '../../templates/game-card.html?raw';
 
 declare global {
     interface Window {
@@ -10,31 +10,30 @@ declare global {
 }
 
 export class GameCard extends HTMLElement {
-    private gameData: GameSummary | null = null;
+    private gameData: GameSummary | null = null;    
+
+     connectedCallback() {
+        console.log('GameCard connected to DOM');
+    }
 
     set game(value: GameSummary) {
-        this.gameData = value;
+        console.log('Setting game data for card:', value.title);
+        this.gameData = value;        
         this.render();
-    }
-
-    async loadGameData() {
-        try {
-            this.gameData = await window.electronAPI.invoke('get-game-detail', this.id);
-            this.render();
-        } catch (error) {
-            console.error('Error loading game data:', error);
-            this.innerHTML = `<div class="error">Error al cargar el juego</div>`;
-        }
-    }
+    }  
 
     render() {
         if (!this.gameData) {
-            this.innerHTML = `<div class="loading">Cargando...</div>`;
+            this.innerHTML = `<div class="loading">Cargando...</div>`;            
             return;
         }
 
-        const game = this.gameData;
         this.innerHTML = gameCardHtml;
+        this.classList.add('game-card'); // Agregar clase para estilos
+
+        console.log('Rendering game card for:', this.gameData.title);
+
+        const game = this.gameData;        
         //Llenar datos del juego en el template
         //Game Title
         this.querySelector('.game-title')!.textContent = game.title;
@@ -56,7 +55,7 @@ export class GameCard extends HTMLElement {
         playBtn?.setAttribute('data-game-id', game.id); // Guardar el ID del juego en el dataset del botón
         playBtn?.addEventListener('click', (e) => { // Agregar listener al botón de jugar
             e.stopPropagation();
-            window.electronAPI.invoke('launch-game-by-id', this.id);
+            window.electronAPI.invoke('launch-game-by-id', game.id);
         });
 
         const deleteBtn = this.querySelector('.delete-button'); // Seleccionar el botón de eliminar        

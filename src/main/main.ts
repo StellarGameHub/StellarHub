@@ -34,7 +34,7 @@ app.whenReady().then(() => {
   protocol.handle('estelarhub', (request) => {
     const url = new URL(request.url);
     // url.pathname será algo como "/images/grid/abc.png"
-    const filePath = path.join(app.getPath('userData'), decodeURIComponent(url.pathname));
+    const filePath = path.join(app.getPath('userData'), "images", decodeURIComponent(url.pathname));
     console.log(`Serving image from path: ${filePath}`);
     return net.fetch('file://' + filePath);
   });
