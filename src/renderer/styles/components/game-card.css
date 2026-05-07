@@ -1,19 +1,20 @@
 .game-card {
     display: block;
     width: var(--card-width);
+    height: fit-content;    
     margin: 10px;
     transition: transform 0.2s;
     cursor: pointer;
     background: var(--card-bg);
-    overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-.game-card:hover  {
+.game-card:hover {
     transform: scale(1.05);
     border: 2px solid var(--accent-hover);
 
 }
+
 .game-card.selected {
     transform: scale(1.05);
     border: 2px solid var(--accent-hover);
@@ -23,7 +24,7 @@
     width: 100%;
     aspect-ratio: 2/3;
     object-fit: cover;
-    
+
 }
 
 .game-info {

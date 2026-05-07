@@ -1,12 +1,21 @@
 <div class="main-container theme-desktop ">
-     <div class="ds-header">
-      <button class="button-toggle-fullscreen">Pantalla Completa</button>
-      <h1>EstelarHub - Modo Desktop</h1>
-    </div>
+  <div class="ds-header">
+    <button class="button-toggle-fullscreen">Pantalla Completa</button>
+    <h1>EstelarHub - Modo Desktop</h1>
+  </div>
 
-    <!-- METER ESTO EN UN COMPONENTE SEPARADO -->
-    <button class="btn-add-game-modal">+ Agregar juego manual</button>
-    
+  <!-- METER ESTO EN UN COMPONENTE SEPARADO -->
+  <desktop-menu>
+    <button id="btn-add-game-modal">Agregar juego manual</button>
+    <button id="btn-add-category-modal">Ver Categorias</button>
+    <button id="btn-manage-scans-modal"> Administrar escaneos de ROMs</button>
+  </desktop-menu>
+
+  <desktop-content>
+    <div id="desktop-background" class="desktop-background">      
+    </div>
     <div class="ds-grid" id="ds-grid"></div>
     <div class="ds-details-panel" id="ds-details-panel"></div>
+  </desktop-content>
+
 </div>

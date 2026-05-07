@@ -1,0 +1,22 @@
+<div class="modal-content">
+    <h3>Escaneo de ROMS</h3>
+    <div id="div-scan-manager-content">
+        <template id="template-scan-config-item">
+            <div class="scan-config-item" data-id="${config.id}">
+                <div class="config-info">
+                    <strong class="system-name"></strong>
+                    <span class="roms-folder"></span>
+                    <span class="enabled"></span>
+                </div>
+                <div class="config-actions">
+                    <button class="edit-config">✏️ Editar</button>
+                    <button class="delete-config">🗑️ Eliminar</button>
+                    <button class="run-scan">🔄 Escanear ahora</button>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <button id="btn-add-new-scan">+ Nuevo</button>
+    <button id="btn-close-scan-manager">Cerrar</button>
+</div>

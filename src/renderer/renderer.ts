@@ -8,7 +8,6 @@ import { getUIMode, onUIModeChange, toggleFullscreenUI } from './services/uiMode
 import { renderDesktopLayout } from './layouts/DesktopLayout'; // Importar función para renderizar el layout de escritorio
 import { renderFullscreenLayout } from './layouts/FullscreenLayout'; // Importar función para renderizar el layout de fullscreen
 import { setUIMode } from './services/uiMode'; // Funcion para setear el modo UI desde la configuración
-import { initAddGameModal } from './components/desktop/AddGameModal'; // Inicializar modal de agregar juego
 import { startGamepadListening, stopGamepadListening } from './services/gamepad'; // Funciones para manejar gamepad
 
 //Cargar estilos globales
@@ -19,8 +18,15 @@ import './styles/components/game-card.css';
 import './styles/components/modal.css';
 
 //Cargar componentes
-import  './components/shared/GameCard';
+import './components/shared/GameCard';
+import './components/desktop/AddGameModal';
+import './components/desktop/AddCategoryModal';
+import './components/desktop/AddScanConfigModal';
+import './components/desktop/ScanManagerModal';
 
+import { initAddCategoryModal } from './components/desktop/AddCategoryModal';
+import { initAddGameModal } from './components/desktop/AddGameModal';
+import { initScanManagerModal } from './components/desktop/ScanManagerModal';
 
 // Configuración específica del gamepad para el modo fullscreen (se llama cada vez que se entra a ese modo)
 let currentSelectedIndex = 0;
@@ -52,7 +58,7 @@ export function setupFullscreenGamepad() {
     onDirectionChange: (dx, dy) => {
       // Movimiento horizontal (left stick X)
       if (Math.abs(dx) > 0.5) {
-        const cards = document.querySelectorAll('.fs-game-card');
+        const cards = document.querySelectorAll('.game-card');
         if (cards.length === 0) return;
         currentSelectedIndex = (currentSelectedIndex + (dx > 0 ? 1 : -1) + cards.length) % cards.length;
         updateSelection();
@@ -60,7 +66,7 @@ export function setupFullscreenGamepad() {
       // Opcional: movimiento vertical si quisieras grid 2D
     },
     onAccept: () => {
-      const cards = document.querySelectorAll('.fs-game-card');
+      const cards = document.querySelectorAll('.game-card');
       const gameId = cards[currentSelectedIndex]?.getAttribute('data-id');
       if (gameId) launchGame(gameId);
     },
@@ -78,7 +84,7 @@ export function setupFullscreenGamepad() {
   requestAnimationFrame(updateSelection);
 }
 
-async function initFromSettings() {
+async function initLayoutFromSettings() {
   const settings = await window.electronAPI.invoke('get-settings');
   if (settings.launchInFullscreen) {
     console.log('Launching in fullscreen mode');
@@ -117,13 +123,14 @@ async function renderCurrentLayout() {
   const mode = getUIMode();
   const appContainer = document.querySelector('#div-app') as HTMLElement;
 
-
   if (mode === 'desktop') {
     currentLayout = renderDesktopLayout(games);
     appContainer.replaceChildren(currentLayout);
 
-    stopGamepadListening(); // Aseguramos que el gamepad no escuche en modo escritorio
-    initAddGameModal(); // Inicializar modal de agregar juego (solo en desktop)
+    initAddGameModal(); // Inicializar modal de añadir juego
+    initAddCategoryModal(); // Inicializar modal de categorías    
+    initScanManagerModal(); // Inicializar modal de Escaneos de Roms
+    stopGamepadListening(); // Aseguramos que el gamepad no escuche en modo escritorio    
   } else {
     currentLayout = renderFullscreenLayout(games);
     appContainer.replaceChildren(currentLayout);
@@ -158,4 +165,4 @@ window.addEventListener('games-updated', () => {
 });
 
 
-initFromSettings();
+initLayoutFromSettings();

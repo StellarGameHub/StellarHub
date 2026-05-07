@@ -8,24 +8,58 @@
   --border-radius: 12px;
 
 
-  --card-width: 10rem;
+  --card-width: 10vw;
   --card-bg: #77353575;
 }
 
+.ds-header {
+  width: 100%;
+}
 
 .ds-grid {
-  width: 50%;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
-  gap: 20px;
+  max-width: 50% !important;
+  width: 50% !important;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: 15rem;
+  scrollbar-color: var(--accent);
+  scrollbar-gutter: stable;
 }
 
 .ds-details-panel {
   background: var(--bg-color);
-  background-color: red;
+  background-color: var(--accent);
   color: var(--text-color);
   width: 50%;
   height: 100%;
   padding: 1rem;
   border-radius: var(--border-radius);
+}
+
+desktop-content {
+  display: flex;
+  flex-wrap: wrap;
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.desktop-background {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  z-index: -1;
+  top: 0;
+  left: 0;
+
+  filter: blur(10px);
+  filter: opacity(0.1);
+
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }

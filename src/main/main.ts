@@ -5,6 +5,9 @@ import { registerSettingsHandlers } from './ipc/settings';
 import { registerImageHandlers } from './ipc/images';
 
 import path from 'path';
+import { registerCategoriesHandlers } from './ipc/categories';
+import { registerDialogHandlers } from './ipc/dialogs';
+import { registerScanHandlers } from './ipc/scan';
 
 
 function createWindow() {
@@ -39,6 +42,9 @@ app.whenReady().then(() => {
     return net.fetch('file://' + filePath);
   });
 
+  registerScanHandlers();
+  registerDialogHandlers();
+  registerCategoriesHandlers();
   registerSettingsHandlers();
   registerGameHandlers();
   registerProtonHandlers();

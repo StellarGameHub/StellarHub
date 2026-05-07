@@ -4,7 +4,8 @@
   --accent: #2c3e66;
   --accent-hover: #3e5a8a;
   --border-radius: 12px;
-  
+
+  --gap: 0.5rem;
 }
 
 
@@ -14,11 +15,11 @@
   box-sizing: border-box;
 }
 
-body {  
+body {
   font-family: system-ui, sans-serif;
   background: var(--bg-color);
   color: var(--text-color);
-  padding: 2rem;  
+  padding: 2rem;
   height: 100vh !important;
   width: 100vw !important;
 }
@@ -33,6 +34,27 @@ button {
   font-size: 0.9rem;
 }
 
+select {
+  appearance: base-select;
+}
+
+::picker(select) {
+  appearance: base-select;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: 0.5rem 0.5rem;
+  border-radius: var(--border-radius);
+  border-color: var(--accent);
+}
+
+select::picker-icon {
+  transition: 300ms ease;
+}
+
+select:open::picker-icon {
+  rotate: 180deg;
+}
+
 button:hover {
   background: var(--accent-hover);
 }
@@ -45,11 +67,35 @@ button:hover {
 
 /* Contenedor Principal del Layout */
 
-.main-container{
+.main-container {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   flex-direction: column;
-  gap: 1rem;
-  height: 100%  !important;
-  width: 100%  !important;
+  gap: var(--gap);
+  height: 100% !important;
+  width: 100% !important;
+}
+
+
+/* Customized WebKit scrollbar */
+/*TODO:*/
+/*AJUSTAR PARA USAR VARIABLES ETC.*/
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+  border: 3px solid #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

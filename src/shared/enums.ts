@@ -1,3 +1,3 @@
-export enum GameType {
-  manual, steam, rom
+export enum GameSource {
+  MANUAL, STEAM, ROM, GOG
 }

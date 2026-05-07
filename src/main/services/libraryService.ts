@@ -2,7 +2,8 @@
 import { app } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
-import { GameDetail, LaunchConfig } from '../../shared/types';
+import { Game, ExecutableGame, LaunchConfig } from '../../shared/types';
+import { GameSource } from '../../shared/enums';
 
 // --- Helpers de Rutas ---
 function getGamesFilePath(): string {
@@ -14,11 +15,12 @@ function getGamesFilePath(): string {
 }
 
 // --- Funciones CRUD (Create, Read, Update, Delete) ---
-export async function getGames(): Promise<GameDetail[]> {
+export async function getGames(): Promise<Game[]> {
     const filePath = getGamesFilePath();
     try {
         const data = await fs.readFile(filePath, 'utf-8');
-        return JSON.parse(data);
+        const games = JSON.parse(data);
+        return games as Game[];
     } catch (error: any) {
         if (error.code === 'ENOENT') {
             // Si el archivo no existe, devolvemos una lista vacía
@@ -30,30 +32,27 @@ export async function getGames(): Promise<GameDetail[]> {
 }
 
 
-export async function getGameData(id: string): Promise<GameDetail | undefined> {
+export async function getGameData(id: string): Promise<Game | undefined> {
     const games = await getGames();
     return games.find(game => game.id === id);
 }
 
-export async function saveGame(game: GameDetail): Promise<void> {
+export async function saveGame(game: Game): Promise<void> {
     const games = await getGames();
     const index = games.findIndex(g => g.id === game.id);
-    if (index !== -1) {
-        games[index] = game;
-    } else {
-        games.push(game);
-    }
+    if (index !== -1) games[index] = game;
+    else games.push(game);
     await saveGames(games);
 }
 
-async function saveGames(games: GameDetail[]): Promise<void> {
+export async function saveGames(games: Game[]): Promise<void> {
     const filePath = getGamesFilePath();
     await fs.writeFile(filePath, JSON.stringify(games, null, 2));
 }
 
 export async function deleteGame(gameID: string) {
     const games = await getGames();
-    const gameIndex = games.findIndex(g => g.id == gameID)    
+    const gameIndex = games.findIndex(g => g.id == gameID)
 
     if (gameIndex === -1) {
         console.warn(`attempt to delete non-existent game, with ID: ${gameID}`)
@@ -79,5 +78,8 @@ export async function updatePlaytime(gameID: string, additionalMinutes: number):
  */
 export async function getLaunchConfig(gameId: string): Promise<LaunchConfig | undefined> {
     const game = await getGameData(gameId);
-    return game?.launchConfig;
+    
+    if (game?.source == GameSource.MANUAL || game?.source == GameSource.STEAM || game?.source == GameSource.GOG) {
+        return (game as ExecutableGame).launchConfig;
+    }    
 }

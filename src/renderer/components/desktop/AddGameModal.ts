@@ -6,10 +6,7 @@ let protonVersionsCache: any[] | null = null;  // Cache de versiones
 export async function initAddGameModal() {
     console.log('Initializing Add Game Modal');
     
-    if (!modalInstance) {
-
-        console.log('Creating modal instance');
-
+    if (!modalInstance) {        
         const dialog = document.createElement('dialog');
         dialog.id = 'add-game-modal';
         dialog.innerHTML = `
@@ -25,7 +22,7 @@ export async function initAddGameModal() {
 
         modalInstance = dialog;
 
-        const openModalBtn = document.querySelector('.btn-add-game-modal');
+        const openModalBtn = document.querySelector('#btn-add-game-modal');
         openModalBtn?.addEventListener('click', async () => {
             // Mostrar modal inmediatamente con loading
             dialog.showModal();

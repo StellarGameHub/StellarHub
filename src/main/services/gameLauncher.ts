@@ -1,7 +1,6 @@
 // src/main/services/gameLauncherService.ts
 import { spawn } from 'child_process';
-import { LaunchConfig } from '../../shared/types';
-import { updatePlaytime } from './libraryService';
+import { LaunchConfig, RomGame } from '../../shared/types';
 
 /**
  * Construye el objeto de entorno para umu-run
@@ -96,4 +95,43 @@ export async function launchManualGame(
             }
         });
     });
+}
+
+/**
+ * Lanza un juego usando emulador.
+ * @param romDetails Detalles de la ROM (ruta, emulador, args)
+ * @param config Configuración de lanzamiento
+ * @returns Promesa que se resuelve cuando el proceso se inicia
+ */
+export async function launchEmulator(romGame: RomGame, onExit?: (durationMinutes: number) => void): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const startTime = Date.now();
+
+        const finalArgs = romGame.romDetails.launchArguments.replace(/\{gamePath\}/g, romGame.romDetails.romPath).split(' ');
+
+        const child = spawn(romGame.romDetails.emulatorPath, finalArgs, {
+            detached: true,
+            stdio: 'ignore',
+        });
+
+        child.on('error', (err) => {
+            console.error(`[GameLauncher] Error al lanzar ${romGame.romDetails.romPath}:`, err);
+            reject(err);
+        });
+
+        child.on('spawn', () => {
+            console.log(`[GameLauncher] ROM ${romGame.id} iniciada (PID: ${child.pid})`);
+            resolve();
+        });
+
+        child.on('exit', (code, signal) => {
+            const endTime = Date.now();
+            const durationMinutes = Math.floor((endTime - startTime) / 60000);
+            console.log(`[GameLauncher] ROM ${romGame.id} terminada. Código: ${code}, Señal: ${signal}. Duración: ${durationMinutes} minutos.`);
+            if (onExit) {
+                onExit(durationMinutes);
+            }
+        });
+    }
+    );
 }

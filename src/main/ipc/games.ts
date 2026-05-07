@@ -1,8 +1,8 @@
 import { ipcMain } from 'electron';
-import { GameType } from '../../shared/enums';
-import { GameDetail } from '../../shared/types';
+import { GameSource } from '../../shared/enums';
+import { Game } from '../../shared/types';
 import { saveGameImage } from '../services/imageService';
-import { launchManualGame } from '../services/gameLauncher';
+import { launchEmulator, launchManualGame } from '../services/gameLauncher';
 import { getGames, getGameData, saveGame, getLaunchConfig, updatePlaytime, deleteGame } from '../services/libraryService';
 
 export function registerGameHandlers() {
@@ -36,12 +36,12 @@ export function registerGameHandlers() {
                 gridImagePath = await saveGameImage(newId, imageBuffer, imageExt, 'grid');
             }
 
-            const newGame: GameDetail = {
+            const newGame: Game = {
                 ...gameData,
                 id: newId,
                 addedAt: new Date(),
                 playtimeMinutes: 0,
-                source: GameType.manual,
+                source: GameSource.MANUAL,
                 gameImages: {
                     grid: gridImagePath,
                 }
@@ -64,7 +64,7 @@ export function registerGameHandlers() {
             }
             // Switch para el tipo de Game
             switch (gameData?.source) {
-                case GameType.manual:
+                case GameSource.MANUAL:
                     // Lanzamos el juego y pasamos un callback para actualizar el playtime al salir
 
                     await launchManualGame(config, gameId, async (durationMinutes) => {
@@ -73,6 +73,13 @@ export function registerGameHandlers() {
                         }
                     });
                     break;
+                case GameSource.ROM:
+                    // Aquí lanzaríamos el juego ROM usando su configuración específica
+                    await launchEmulator(gameData, async (durationMinutes) => {
+                        if (durationMinutes > 0) {
+                            await updatePlaytime(gameId, durationMinutes);
+                        }
+                    });
             }
 
             return { success: true };

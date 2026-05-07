@@ -1,23 +1,28 @@
-
 import { GameSummary } from '../../shared/types';
 import { GameCard } from '../components/shared/GameCard';
+import { GameSource } from '../../shared/enums';
 import desktopLayoutHTML from './desktop-layout.html?raw';
-
 
 export function renderDesktopLayout(games: GameSummary[]): DocumentFragment {
 
-
     // Agregar juegos de prueba
-    // games.push({
-    //     id: 'test-game',
-    //     title: 'Test Game',
-    //     isInstalled: true,
-    //     isHidden: false,
-    //     playtimeMinutes: 120,
-    //     releaseYear: 2020,
-    //     developer: 'Test Devs',
-    //     source: 0, // GameType.manual
-    // });
+    games.push({
+        id: 'test-game',
+        title: 'Test Game',
+        isInstalled: true,
+        addedAt: new Date(),
+        lastPlayedAt: new Date(),        
+        playtimeMinutes: 120,
+        releaseYear: 2020,
+        developer: 'Test Devs',
+        source: GameSource.MANUAL, // GameType.manual
+        gameImages:{
+            grid : 'images/grid/1102f2b0-6990-4268-99a3-e4d3912d4c98.webp',
+            cover: '',
+            background: '',
+            banner: '',
+        }
+    });
 
     const template = document.createElement('template');
     template.innerHTML = desktopLayoutHTML;    

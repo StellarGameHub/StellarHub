@@ -12,10 +12,6 @@ declare global {
 export class GameCard extends HTMLElement {
     private gameData: GameSummary | null = null;    
 
-     connectedCallback() {
-        console.log('GameCard connected to DOM');
-    }
-
     set game(value: GameSummary) {
         console.log('Setting game data for card:', value.title);
         this.gameData = value;        
@@ -29,10 +25,7 @@ export class GameCard extends HTMLElement {
         }
 
         this.innerHTML = gameCardHtml;
-        this.classList.add('game-card'); // Agregar clase para estilos
-
-        console.log('Rendering game card for:', this.gameData.title);
-
+        this.classList.add('game-card'); // Agregar clase para estilos        
         const game = this.gameData;        
         //Llenar datos del juego en el template
         //Game Title

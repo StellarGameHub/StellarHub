@@ -2,26 +2,6 @@ import fs from 'fs/promises';
 import path from 'path';
 import { app } from 'electron';
 
-// export async function saveGameImage(
-//     gameId: string,
-//     originalPath: string,
-//     type: 'grid' | 'cover' | 'banner'
-// ): Promise<string> {
-//     try {
-//         const imagesDir = path.join(app.getPath('userData'), 'images', type);
-//         await fs.mkdir(imagesDir, { recursive: true });
-
-//         const ext = path.extname(originalPath);
-//         const destFileName = `${gameId}${ext}`;
-//         const destPath = path.join(imagesDir, destFileName);
-
-//         await fs.copyFile(originalPath, destPath);
-//         return destPath;
-//     } catch (err) {
-//         console.error(`Error saving image for game ${gameId} of type ${type}:`, err);
-//         throw err;
-//     }
-// }
 
 export async function deleteGameImage(gameId: string, type: 'grid' | 'cover' | 'banner'): Promise<void> {
     const imagesDir = path.join(app.getPath('userData'), 'images', type);
@@ -64,6 +44,32 @@ export async function saveGameImage(
         return relativePath;
     } catch (err) {
         console.error(`Error saving image for game ${gameId} (${imageType}):`, err);
+        throw err;
+    }
+}
+
+export async function saveGameCategoryImage(
+    categoryId: string,
+    imageBuffer: Uint8Array,
+    imageExt: string,
+): Promise<string> {
+    try {
+        // Carpeta destino completa
+        const imagesDir = path.join(app.getPath('userData'), 'images', 'categories');
+        // Crear directorio si no existe (recursivo por si faltan 'images' también)
+        await fs.mkdir(imagesDir, { recursive: true });
+
+        // Ruta relativa para guardar en la base de datos
+        const fileName = `${categoryId}.${imageExt}`;
+        const relativePath = path.join('images', 'categories', fileName);
+        const fullPath = path.join(imagesDir, fileName);
+
+        await fs.writeFile(fullPath, Buffer.from(imageBuffer));
+        console.log(`Imagen guardada en: ${fullPath}`);
+
+        return relativePath;
+    } catch (err) {
+        console.error(`Error saving image for categorie ${categoryId}:`, err);
         throw err;
     }
 }
