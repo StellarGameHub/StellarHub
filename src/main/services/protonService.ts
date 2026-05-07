@@ -31,10 +31,13 @@ async function scanProtonVersions(): Promise<ProtonVersion[]> {
       for (const item of items) {
         if (item.isDirectory()) {
           const protonPath = path.join(basePath, item.name);
+
+          if (versions.some(x=>x.path == protonPath)) continue;
+
           // Verificar si dentro hay un ejecutable llamado 'proton' o 'Proton'
           const protonExe = path.join(protonPath, 'proton');
           const protonExeAlt = path.join(protonPath, 'Proton');
-          if (await fileExists(protonExe) || await fileExists(protonExeAlt)) {
+          if ( (await fileExists(protonExe) || await fileExists(protonExeAlt) )) {
             versions.push({
               name: item.name,
               path: protonPath,
@@ -47,12 +50,6 @@ async function scanProtonVersions(): Promise<ProtonVersion[]> {
       // El directorio no existe o no se puede leer
     }
   }
-
-  // Opcional: añadir la versión integrada de umu-launcher (si la detectas)
-  try {
-    const { stdout } = await execPromise('umu-run --proton-version');
-    // depende de la salida de umu-run, quizás no implementado
-  } catch (err) {}
 
   return versions;
 }

@@ -14,12 +14,17 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
+    //frame:false,
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
     },
   });
+
+  //Hide Browser Menu
+  win.setMenu(null);
+  
 
   // En desarrollo, carga el servidor de Vite
   if (process.env.NODE_ENV === 'development') {

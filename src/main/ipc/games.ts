@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron';
 import { GameSource } from '../../shared/enums';
-import { Game } from '../../shared/types';
+import { ExecutableGame, Game, LaunchConfig } from '../../shared/types';
 import { saveGameImage } from '../services/imageService';
 import { launchEmulator, launchManualGame } from '../services/gameLauncher';
 import { getGames, getGameData, saveGame, getLaunchConfig, updatePlaytime, deleteGame } from '../services/libraryService';
@@ -36,7 +36,7 @@ export function registerGameHandlers() {
                 gridImagePath = await saveGameImage(newId, imageBuffer, imageExt, 'grid');
             }
 
-            const newGame: Game = {
+            const newGame: ExecutableGame = {
                 ...gameData,
                 id: newId,
                 addedAt: new Date(),
@@ -44,7 +44,7 @@ export function registerGameHandlers() {
                 source: GameSource.MANUAL,
                 gameImages: {
                     grid: gridImagePath,
-                }
+                },
             };
 
             await saveGame(newGame);
@@ -57,15 +57,18 @@ export function registerGameHandlers() {
 
     ipcMain.handle('launch-game-by-id', async (event, gameId: string) => {
         try {
-            const gameData = await getGameData(gameId);
-            const config = await getLaunchConfig(gameId);
-            if (!config) {
-                throw new Error(`No launch configuration found for game ${gameId}`);
-            }
+            const gameData = await getGameData(gameId) as Game;
+
             // Switch para el tipo de Game
             switch (gameData?.source) {
                 case GameSource.MANUAL:
                     // Lanzamos el juego y pasamos un callback para actualizar el playtime al salir
+
+                    const config = await getLaunchConfig(gameId) as LaunchConfig;
+
+                    if (!config) {
+                        throw new Error(`No launch configuration found for game ${gameId}`);
+                    }
 
                     await launchManualGame(config, gameId, async (durationMinutes) => {
                         if (durationMinutes > 0) {

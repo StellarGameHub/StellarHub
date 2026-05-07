@@ -1,6 +1,7 @@
 .game-card {
     display: block;
     width: var(--card-width);
+    min-width: 10rem;
     height: fit-content;    
     margin: 10px;
     transition: transform 0.2s;

@@ -5,8 +5,8 @@ let protonVersionsCache: any[] | null = null;  // Cache de versiones
 
 export async function initAddGameModal() {
     console.log('Initializing Add Game Modal');
-    
-    if (!modalInstance) {        
+
+    if (!modalInstance) {
         const dialog = document.createElement('dialog');
         dialog.id = 'add-game-modal';
         dialog.innerHTML = `
@@ -62,7 +62,9 @@ export async function initAddGameModal() {
             }
             const gameData = extractGameDataFromForm(form);
 
-            const createResult = await window.electronAPI.invoke('add-manual-game', { ...gameData, imageBuffer, imageExt });
+            console.log("AddGameModal, Post, GameData:", gameData)
+
+            const createResult = await window.electronAPI.invoke('add-manual-game', { gameData, imageBuffer, imageExt });
             if (createResult.success) {
                 window.dispatchEvent(new CustomEvent('games-updated'));
                 dialog.close();
@@ -89,6 +91,7 @@ export async function initAddGameModal() {
     async function loadProtonVersionsWithCache(dialog: HTMLDialogElement) {
         if (protonVersionsCache !== null) {
             // Usar caché
+            console.log("Cargando Versiones de Proton desde Cache")
             populateProtonSelect(dialog, protonVersionsCache);
             return;
         }
@@ -110,27 +113,14 @@ export async function initAddGameModal() {
     function populateProtonSelect(dialog: HTMLDialogElement, versions: any[]) {
         const select = dialog.querySelector('#protonVersion') as HTMLSelectElement;
         if (!select) return;
-        select.innerHTML = '<option value="">Proton por defecto</option>';
+        select.innerHTML = '<option value=""></option>';
+
+        console.log("Versions:", versions);
         for (const ver of versions) {
             const option = document.createElement('option');
             option.value = ver.path;
             option.textContent = ver.name;
             select.appendChild(option);
-        }
-    }
-
-
-    async function loadProtonVersions(dialog: HTMLDialogElement) {
-        const result = await window.electronAPI.invoke('get-proton-versions');
-        const select = dialog.querySelector('#protonVersion') as HTMLSelectElement;
-        select.innerHTML = '<option value="">Proton por defecto</option>';
-        if (result.success) {
-            result.versions.forEach((ver: any) => {
-                const option = document.createElement('option');
-                option.value = ver.path;
-                option.textContent = ver.name;
-                select.appendChild(option);
-            });
         }
     }
 

@@ -30,13 +30,17 @@ export async function initScanManagerModal() {
       const container = dialog.querySelector("#div-scan-manager-content");
 
       if (!container) return;
-
+      
       let scansContainer = dialog.querySelector("#div-scan-manager-content");
+      if (!scansContainer) return;
+      //Vaciar la Lista
+      scansContainer.innerHTML = "";
+      
       let template = dialog.querySelector("#template-scan-config-item") as HTMLTemplateElement;;
 
       configs.map(config => {
-        let scanConfigItem = template?.content.cloneNode(true) as HTMLLIElement;
-        scanConfigItem.dataset.id = config.id;
+        let scanConfigItem = document.importNode(template.content, true).firstElementChild?.cloneNode(true) as HTMLElement;
+        scanConfigItem.setAttribute("data-id", config.id);
         scanConfigItem.querySelector(".system-name")!.textContent = config.systemName;
         scanConfigItem.querySelector(".roms-folder")!.textContent = config.romsFolder;
         scanConfigItem.querySelector(".enabled")!.textContent = config.enabled ? "✅ Activado" : "❌ Desactivado";

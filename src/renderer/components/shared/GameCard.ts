@@ -10,29 +10,30 @@ declare global {
 }
 
 export class GameCard extends HTMLElement {
-    private gameData: GameSummary | null = null;    
+    private gameData: GameSummary | null = null;
 
     set game(value: GameSummary) {
         console.log('Setting game data for card:', value.title);
-        this.gameData = value;        
+        this.gameData = value;
         this.render();
-    }  
+    }
 
     render() {
         if (!this.gameData) {
-            this.innerHTML = `<div class="loading">Cargando...</div>`;            
+            this.innerHTML = `<div class="loading">Cargando...</div>`;
             return;
         }
 
         this.innerHTML = gameCardHtml;
         this.classList.add('game-card'); // Agregar clase para estilos        
-        const game = this.gameData;        
+        const game = this.gameData;
         //Llenar datos del juego en el template
         //Game Title
         this.querySelector('.game-title')!.textContent = game.title;
         //Game Cover
         const img = this.querySelector('.game-cover') as HTMLImageElement;
-        img.src = `estelarhub://${game.gameImages?.grid || '/assets/default-cover.png'}`;
+        //Poner imagen Grid o mostrar default
+        img.src = game.gameImages.grid ? `estelarhub://${game.gameImages.grid}` : '/assets/default-cover.png';
         img.alt = game.title;
         //Game Developer
         if (game.developer) {

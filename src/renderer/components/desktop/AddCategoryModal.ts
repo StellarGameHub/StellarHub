@@ -113,7 +113,7 @@ export async function initAddCategoryModal() {
         var template = dialog.querySelector('#category-item-template') as HTMLTemplateElement;
         for (const category of categories) {
             const li = template?.content.cloneNode(true) as HTMLLIElement;
-            li.querySelector('.category-icon')!.setAttribute('src', `estelarhub://${category.icon}`);   
+            li.querySelector('.category-icon')!.setAttribute('src', `estelarhub://${category.icon}`);
             li.querySelector('.category-name')!.textContent = category.name;
             li.querySelector('.remove-category-btn')!.addEventListener('click', async () => {
                 try {
