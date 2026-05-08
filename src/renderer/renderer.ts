@@ -23,9 +23,9 @@ import './components/desktop/AddGameModal';
 import './components/desktop/AddCategoryModal';
 import './components/desktop/AddScanConfigModal';
 import './components/desktop/ScanManagerModal';
+import './components/desktop/DesktopMenu';
 
-import { initAddCategoryModal } from './components/desktop/AddCategoryModal';
-import { initAddGameModal } from './components/desktop/AddGameModal';
+
 import { initScanManagerModal } from './components/desktop/ScanManagerModal';
 
 // Configuración específica del gamepad para el modo fullscreen (se llama cada vez que se entra a ese modo)
@@ -127,8 +127,6 @@ async function renderCurrentLayout() {
     currentLayout = renderDesktopLayout(games);
     appContainer.replaceChildren(currentLayout);
 
-    initAddGameModal(); // Inicializar modal de añadir juego
-    initAddCategoryModal(); // Inicializar modal de categorías    
     initScanManagerModal(); // Inicializar modal de Escaneos de Roms
     stopGamepadListening(); // Aseguramos que el gamepad no escuche en modo escritorio    
   } else {

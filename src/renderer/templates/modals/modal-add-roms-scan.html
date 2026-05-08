@@ -10,15 +10,15 @@
       <label>Carpeta de ROMs *</label>
       <div class="path-selector">
         <input type="text" id="romsFolder" readonly required>
-        <button type="button" id="browseRomsFolder">📂 Examinar</button>
+        <button type="button" class="btn btn-secondary" id="browseRomsFolder">📂 Examinar</button>
       </div>
     </div>
 
     <div class="form-group">
-      <label>Ruta del emulador *</label>
+      <label>Ruta del emulador / Comando *</label>
       <div class="path-selector">
         <input type="text" id="emulatorPath" readonly required>
-        <button type="button" id="browseEmulator">📁 Examinar</button>
+        <button class="btn btn-secondary" type="button" id="browseEmulator">📁 Examinar</button>
       </div>
     </div>
 
@@ -43,8 +43,8 @@
     </div>
 
     <div class="modal-buttons">
-      <button type="submit">Guardar</button>
-      <button type="button" id="close-scan-modal">Cancelar</button>
+      <button class="btn btn-secondary" type="button" id="close-scan-modal">Cancelar</button>
+      <button class="btn btn-primary" type="submit">Guardar</button>
     </div>
   </form>
 </div>

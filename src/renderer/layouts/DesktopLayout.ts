@@ -1,53 +1,71 @@
 import { GameSummary } from '../../shared/types';
 import { GameCard } from '../components/shared/GameCard';
-import { GameSource } from '../../shared/enums';
+import { AddCategoryModal } from '../components/desktop/AddCategoryModal';
 import desktopLayoutHTML from './desktop-layout.html?raw';
+
+import '../components/desktop/AddCategoryModal';
+import '../components/desktop/AddGameModal';
+import '../components/desktop/DesktopMenu';
+
+//clases css
+import '../styles/components/desktop-menu.css'
+import { AddGameModal } from '../components/desktop/AddGameModal';
 
 export function renderDesktopLayout(games: GameSummary[]): DocumentFragment {
 
-    // Agregar juegos de prueba
-    // games.push({
-    //     id: 'test-game',
-    //     title: 'Test Game',
-    //     isInstalled: true,
-    //     addedAt: new Date(),
-    //     lastPlayedAt: new Date(),        
-    //     playtimeMinutes: 120,
-    //     releaseYear: 2020,
-    //     developer: 'Test Devs',
-    //     source: GameSource.MANUAL, // GameType.manual
-    //     gameImages:{
-    //         grid : 'images/grid/1102f2b0-6990-4268-99a3-e4d3912d4c98.webp',
-    //         cover: '',
-    //         background: '',
-    //         banner: '',
-    //     }
-    // });
-
     const template = document.createElement('template');
-    template.innerHTML = desktopLayoutHTML;    
+
+    template.innerHTML = desktopLayoutHTML;
 
     const content = template.content;
 
+    console.log("Contenido del DesktopLaytour", content)
+
     const grid = content.querySelector('#ds-grid') as HTMLElement;
 
-    console.log('Games to render:', games);
-
     games.forEach(game => {
-        console.log('Rendering game:', game.title);
+
         const card = document.createElement('game-card') as GameCard;
-        card.game = game; // Esto asigna el juego y llama a render() dentro del componente
-        console.log('Created card for game:', game.title, 'card element:', card);
+
+        card.game = game;
+
         grid.appendChild(card);
+
     });
 
-    const fullscreenBtn = content.querySelector('.button-toggle-fullscreen') as HTMLButtonElement;
-    fullscreenBtn.addEventListener('click', () => {
-        // Entrar al modo fullscreen (desde uiMode)
-        import('../services/uiMode').then(({ toggleFullscreenUI }) => {
-            toggleFullscreenUI();
+
+    //ESCUCHAR EVENTOS DE LOS COMPONENTES
+    const menu = content.querySelector('desktop-menu');
+    if (menu) {
+
+        // FULLSCREEN
+
+        menu.addEventListener('toggle-fullscreen', () => {
+            console.log("Esuchando a ToggleFullscreen");
+
+            import('../services/uiMode').then(({ toggleFullscreenUI }) => {
+                toggleFullscreenUI();
+            });
+
         });
-    });
+
+        // MODALs
+
+        const addCategoryModal = content.querySelector('modal-add-category') as AddCategoryModal;
+
+        menu.addEventListener('open-add-category-modal', () => {
+            console.log("Esuchando a OpenAddCategoryModal");
+            addCategoryModal.open();
+        });
+
+        const addGameModal = content.querySelector('modal-add-game') as AddGameModal;
+
+        menu.addEventListener('open-add-game-modal', () => {
+            addGameModal.open();
+        });
+
+    }
 
     return content;
+
 }

@@ -1,4 +1,4 @@
-import modalHtml from '../../templates/modal-scan-manager.html?raw';
+import modalHtml from '../../templates/modals/modal-scan-manager.html?raw';
 
 import { ScanConfig } from '../../../shared/types';
 import { initAddScanConfigModal, openScanConfigModal } from './AddScanConfigModal';

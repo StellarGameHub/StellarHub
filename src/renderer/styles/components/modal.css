@@ -24,21 +24,30 @@ dialog::backdrop {
     backdrop-filter: blur(2px);
 }
 
+.path-selector {
+    width: 100%;
+    display: flex;
+    gap: var(--gap);
+}
+
+.path-selector>input {
+    flex-grow: 1;
+}
+
 /* Contenido del modal */
 .modal-content {
-    background: var(--card-bg);
+    background: var(--surface-background);
     color: var(--text-color);
     width: 100%;
     max-width: 600px;
-    padding: 2rem;
+    padding: var(--padding);
     border-radius: var(--border-radius);
-
+    gap: var(--gap);
     display: flex;
     flex-wrap: wrap;
     flex-direction: column;
     gap: var(--gap);
-
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    box-shadow: var(--shadow-md);
 }
 
 .modal-content form {
@@ -59,12 +68,34 @@ dialog::backdrop {
 }
 
 .modal-content input,
-.modal-content select {
-    padding: 0.5rem;
-    border-radius: 6px;
-    border: 1px solid #2c3e66;
-    background: #0b0e14;
-    color: white;
+.modal-content select,
+.modal-content textarea {
+    padding: var(--padding);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    background: var(--surface-elevated);
+    color: var(--text-color);
+
+}
+
+.modal-content input::placeholder,
+.modal-content select::placeholder,
+.modal-content textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.modal-content input:hover,
+.modal-content select:hover,
+.modal-content textarea:hover {
+    background: var(--surface-elevated-hover);
+}
+
+.modal-content input:focus,
+.modal-content select:focus,
+.modal-content textarea:focus {
+    outline: none;
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgb(77 163 255 / 0.15);
 }
 
 .modal-buttons {
@@ -77,7 +108,7 @@ dialog::backdrop {
 .spinner {
     border: 4px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
-    border-top: 4px solid var(--accent);
+    border-top: 4px solid var(--secondary);
     width: 40px;
     height: 40px;
     animation: spin 1s linear infinite;

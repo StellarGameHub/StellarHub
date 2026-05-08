@@ -1,42 +1,31 @@
 .theme-desktop {
-  /* COLORS */
-  --bg-color: #1e1e1e;
-  --text-color: #cfd8e6;
-  --accent: #2c3e66;
-  --accent-hover: #3e5a8a;
-
-  --border-radius: 12px;
-
-
-  --card-width: 10vw;
-  --card-bg: #77353575;
+  --coloresnuevos: #ffffff;
 }
 
 .ds-header {
   width: 100%;
 }
 
+.ds-grid,
+.ds-details-panel {
+  flex: 1 1 calc(50% - var(--gap));
+
+}
+
 .ds-grid {
-  max-width: 50% !important;
-  width: 50% !important;
   height: 100%;
   display: flex;
   flex-wrap: wrap;
   gap: var(--gap);
   overflow-y: auto;
   overflow-x: hidden;
-  scrollbar-width: 15rem;
-  scrollbar-color: var(--accent);
-  scrollbar-gutter: stable;
 }
 
 .ds-details-panel {
-  background: var(--bg-color);
-  background-color: var(--accent);
+  background-color: var(--surface);
   color: var(--text-color);
-  width: 50%;
   height: 100%;
-  padding: 1rem;
+  padding: var(--padding);
   border-radius: var(--border-radius);
 }
 
@@ -46,6 +35,8 @@ desktop-content {
   flex-grow: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  gap: var(--gap);
+  padding: var(--padding);
 }
 
 .desktop-background {
@@ -56,8 +47,7 @@ desktop-content {
   top: 0;
   left: 0;
 
-  filter: blur(10px);
-  filter: opacity(0.1);
+  filter: blur(10px) opacity(0.1);
 
   background-size: cover;
   background-repeat: no-repeat;

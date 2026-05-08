@@ -1,0 +1,74 @@
+<dialog id="add-game-modal">
+    <div class="modal-content">
+        <div id="modal-loading" style="text-align:center; padding:2rem;">
+            <div class="spinner"></div>
+        </div>
+        <div id="modal-form-container" style="display:none;">
+            <h2>Agregar juego manual</h2>
+            <form id="manual-game-form">
+
+                <div class="form-group">
+                    <label>Título:</label>
+                    <input type="text" id="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Ruta del ejecutable:</label>
+                    <div class="path-selector">
+                        <input type="text" id="romsFolder" readonly required>
+                        <button type="button" class="btn btn-secondary" id="executablePath">📂 Examinar</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Prefijo de Proton:</label>
+                    <div class="path-selector">
+                        <input type="text" id="romsFolder" placeholder="~/Games/prefixes/my-game" readonly required>
+                        <button type="button" class="btn btn-secondary" id="winePrefix">📂 Examinar</button>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label>Versión de Proton:</label>
+                    <select id="protonVersion"></select>
+
+                </div>
+                <div class="form-group">
+                    <label>Argumentos del lanzador:</label>
+                    <input type="text" id="launchArgs" placeholder="--no-esync">
+                </div>
+                <div class="form-group">
+
+                    <label>Argumentos del juego:</label>
+                    <input type="text" id="gameArgs" placeholder="+exec autoexec">
+                </div>
+                <div class="form-group">
+                    <label>MangoHud:</label>
+                    <select id="mangoHud">
+                        <option value="false">No</option>
+                        <option value="true">Sí</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>GameMode:</label>
+                    <select id="gameMode">
+                        <option value="false">No</option>
+                        <option value="true">Sí</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Imagen Grid (opcional):</label>
+                    <input type="file" id="gridImageFile" accept="image/png,image/jpeg,image/jpg,image/webp">
+                </div>
+                <div class="form-group">
+                    <div class="modal-buttons">
+                        <button type="button" class="btn btn-secondary" id="close-modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</dialog>

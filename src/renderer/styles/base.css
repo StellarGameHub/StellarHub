@@ -1,13 +1,77 @@
 :root {
+  /*COLORS*/
   --bg-color: #0b0e14;
   --text-color: #cfd8e6;
-  --accent: #2c3e66;
-  --accent-hover: #3e5a8a;
-  --border-radius: 12px;
+  --text-muted: #8b98ad;
+  --text-accent: #1b1b1b;
 
-  --gap: 0.5rem;
+  /* PRIMARY */
+  /* Dorado principal de Stellar */
+  --primary: #f4c542;
+  --primary-hover: #ffd35c;
+
+  /* SECONDARY */
+  /* Azul / acento */
+  --secondary: #42A2F5;
+  --secondary-hover: #76bbff;
+
+  /* TERTIARY */
+  /* Azul-violeta suave para detalles */
+  --tertiary: #5342F5;
+  --tertiary-hover: #5D5A75;
+
+  --surface: #111826;
+  --surface-hover: #182132;
+
+  --surface-elevated: #25334b;
+  --surface-elevated-hover: #202b3d;
+
+  --border-color: #263041;
+
+
+  /*SUCCESS*/
+  --success: #2ea86b;
+  --success-hover: #3bc17e;
+  --success-bg: rgba(46, 168, 107, 0.12);
+  /*ERROR*/
+  --error: #c55a5a;
+  --error-hover: #d97373;
+  --error-bg: rgba(197, 90, 90, 0.12);
+  /*WARNING*/
+  --warning: #e09d32;
+  --warning-hover: #f0b14b;
+  --warning-bg: rgba(224, 157, 50, 0.12);
+
+  /*END COLORS*/
+
+  --border-radius: 12px;
+  --padding: 0.65rem;
+
+  --gap: 0.75rem;
+  --margin: 0.5rem;
+
+  --transparency: 15%;
+
+
+  --shadow-sm: 0 2px 8px rgb(0 0 0 / 0.2), inset 0 1px 0 rgb(255 255 255 / 0.02);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.03);
+  --shadow-lg: 0 16px 40px rgb(0 0 0 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.04);
+
+  --surface-border: 1px solid var(--border-color);
+  --surface-background:
+    linear-gradient(to bottom, rgb(255 255 255 / 0.025), transparent 30%),
+    radial-gradient(circle at 20% 0%, rgb(255 255 255 / 0.04), transparent 70%),
+    var(--surface);
 }
 
+
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../assets/fonts/Inter.ttf') format('truetype');
+  font-display: swap;
+  font-weight: 200 800;
+}
 
 * {
   margin: 0;
@@ -16,23 +80,93 @@
 }
 
 body {
-  font-family: system-ui, sans-serif;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.02em;
   background: var(--bg-color);
   color: var(--text-color);
-  padding: 2rem;
+  padding: 0;
   height: 100vh !important;
   width: 100vw !important;
 }
 
-button {
-  background: var(--accent);
-  border: none;
+
+/* === SECCION BOTONES === */
+
+.btn {
   padding: 0.5rem 1rem;
-  color: white;
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.9rem;
+  font-weight: bold;
 }
+
+.btn-sm {
+  transform: scale(85%);
+}
+
+.btn:active {
+  transform: scale(0.98);
+  transition: transform 0.05s;
+}
+
+.btn:hover {
+  box-shadow: 0 0 12px color-mix(in srgb, color percentage, color percentage) rgb(244 197 66 / 0.25);
+}
+
+/* === BTN PRIMARY === */
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--text-accent);
+  border: 1px solid var(--border-color);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+/* === BTN SECONDARY === */
+
+.btn-secondary {
+  background: var(--surface-elevated);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background: var(--surface-elevated-hover);
+}
+
+/* === BTN DANGER === */
+
+.btn-danger {
+  background: var(--error);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.btn-danger:hover {
+  background: var(--error-hover);
+}
+
+
+/* === UL LISTS === */
+
+ul {
+  padding: var(--padding);
+  gap: var(--gap);
+  list-style-type: none;
+}
+
+li {
+  display: flex;
+  vertical-align: middle;
+  align-items: center;
+  gap: var(--gap);
+}
+
+
+/* === MODERN SLECT === */
 
 select {
   appearance: base-select;
@@ -40,11 +174,11 @@ select {
 
 ::picker(select) {
   appearance: base-select;
-  background-color: var(--bg-color);
+  background-color: var(--surface-elevated);
   color: var(--text-color);
   padding: 0.5rem 0.5rem;
   border-radius: var(--border-radius);
-  border-color: var(--accent);
+  border-color: var(--secondary);
 }
 
 select::picker-icon {
@@ -55,9 +189,19 @@ select:open::picker-icon {
   rotate: 180deg;
 }
 
-button:hover {
-  background: var(--accent-hover);
+select option {
+  border-radius: var(--border-radius);
+  padding: var(--padding);
+  cursor: pointer;
 }
+
+select option:checked {
+  background-color: var(--tertiary);
+
+  border: var(--surface-border);
+}
+
+
 
 /* Div Principal de la app */
 .div-app {
@@ -86,16 +230,14 @@ button:hover {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 10px;
+  background: var(--surface);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: var(--secondary);
   border-radius: 10px;
-  border: 3px solid #f1f1f1;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--secondary-hover);
 }

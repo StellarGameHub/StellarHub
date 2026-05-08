@@ -1,53 +1,25 @@
-import modalHtml from '../../templates/modal-add-game.html?raw';
+import { privateDecrypt } from 'node:crypto';
+import modalHtml from '../../templates/modals/modal-add-game.html?raw';
 
-let modalInstance: HTMLDialogElement | null = null;
-let protonVersionsCache: any[] | null = null;  // Cache de versiones
 
-export async function initAddGameModal() {
-    console.log('Initializing Add Game Modal');
+export class AddGameModal extends HTMLElement {
 
-    if (!modalInstance) {
-        const dialog = document.createElement('dialog');
-        dialog.id = 'add-game-modal';
-        dialog.innerHTML = `
-        <div class="modal-content">
-            <div id="modal-loading" style="text-align:center; padding:2rem;">
-            <div class="spinner"></div>                
-            </div>
-            <div id="modal-form-container" style="display:none;">
-                ${modalHtml}
-            </div>
-        </div>`;
-        document.body.appendChild(dialog);
+    private dialog!: HTMLDialogElement;
 
-        modalInstance = dialog;
+    private protonVersionsCache: any[] | null = null;
 
-        const openModalBtn = document.querySelector('#btn-add-game-modal');
-        openModalBtn?.addEventListener('click', async () => {
-            // Mostrar modal inmediatamente con loading
-            dialog.showModal();
-            showLoading(dialog, true);
+    connectedCallback() {
+        this.render();
+        this.attachEvents();
+    }
 
-            // Cargar versiones (con caché)
-            await loadProtonVersionsWithCache(dialog);
+    private render() {
+        this.innerHTML = modalHtml;
+        this.dialog = this.querySelector('dialog')!;
+    }
 
-            // Mostrar formulario
-            showLoading(dialog, false);
-        });
-
-        const closeBtn = () => {
-            const btn = dialog.querySelector('#close-modal');
-            if (btn) {
-                btn.addEventListener('click', () => {
-                    dialog.close();
-                    const form = dialog.querySelector('#manual-game-form') as HTMLFormElement;
-                    form?.reset();
-                });
-            }
-        };
-        closeBtn();
-
-        const form = dialog.querySelector('#manual-game-form') as HTMLFormElement;
+    private attachEvents() {
+        const form = this.dialog.querySelector('#manual-game-form') as HTMLFormElement;
         form?.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -60,25 +32,48 @@ export async function initAddGameModal() {
                 imageExt = fileInput.files[0].name.split('.').pop() || 'png';
                 imageBuffer = await fileInput.files[0].arrayBuffer(); // Leer el archivo como ArrayBuffer
             }
-            const gameData = extractGameDataFromForm(form);
+            const gameData = this.extractGameDataFromForm(form);
 
             console.log("AddGameModal, Post, GameData:", gameData)
 
             const createResult = await window.electronAPI.invoke('add-manual-game', { gameData, imageBuffer, imageExt });
             if (createResult.success) {
                 window.dispatchEvent(new CustomEvent('games-updated'));
-                dialog.close();
+                this.dialog.close();
                 form.reset();
             } else {
                 alert('Error: ' + createResult.error);
             }
         });
 
+        const closeBtn = this.querySelector('#close-modal');
+
+        closeBtn?.addEventListener('click', () => {
+            this.close();
+        });
     }
 
-    function showLoading(dialog: HTMLDialogElement, isLoading: boolean) {
-        const loadingDiv = dialog.querySelector('#modal-loading') as HTMLElement;
-        const formContainer = dialog.querySelector('#modal-form-container') as HTMLElement;
+    async open() {
+
+        this.dialog.showModal();
+
+        this.showLoading(true);
+
+        await this.loadProtonVersionsWithCache();
+
+        this.showLoading(false);
+
+    }
+
+    close() {
+        this.dialog.close();
+        const form = this.dialog.querySelector('#manual-game-form') as HTMLFormElement;
+        form?.reset();
+    }
+
+    private showLoading(isLoading: boolean) {
+        const loadingDiv = this.dialog.querySelector('#modal-loading') as HTMLElement;
+        const formContainer = this.dialog.querySelector('#modal-form-container') as HTMLElement;
         if (isLoading) {
             loadingDiv.style.display = 'block';
             formContainer.style.display = 'none';
@@ -88,30 +83,30 @@ export async function initAddGameModal() {
         }
     }
 
-    async function loadProtonVersionsWithCache(dialog: HTMLDialogElement) {
-        if (protonVersionsCache !== null) {
+    private async loadProtonVersionsWithCache() {
+        if (this.protonVersionsCache !== null) {
             // Usar caché
             console.log("Cargando Versiones de Proton desde Cache")
-            populateProtonSelect(dialog, protonVersionsCache);
+            this.populateProtonSelect(this.protonVersionsCache);
             return;
         }
 
         const result = await window.electronAPI.invoke('get-proton-versions');
         if (result.success) {
-            protonVersionsCache = result.versions;
-            populateProtonSelect(dialog, result.versions);
+            this.protonVersionsCache = result.versions;
+            this.populateProtonSelect(result.versions);
         } else {
             console.error('Error loading Proton versions:', result.error);
             // Mostrar mensaje de error en el select
-            const select = dialog.querySelector('#protonVersion') as HTMLSelectElement;
+            const select = this.dialog.querySelector('#protonVersion') as HTMLSelectElement;
             if (select) {
                 select.innerHTML = '<option value="">Error al cargar versiones</option>';
             }
         }
     }
 
-    function populateProtonSelect(dialog: HTMLDialogElement, versions: any[]) {
-        const select = dialog.querySelector('#protonVersion') as HTMLSelectElement;
+    populateProtonSelect(versions: any[]) {
+        const select = this.dialog.querySelector('#protonVersion') as HTMLSelectElement;
         if (!select) return;
         select.innerHTML = '<option value=""></option>';
 
@@ -124,7 +119,7 @@ export async function initAddGameModal() {
         }
     }
 
-    function extractGameDataFromForm(form: HTMLFormElement) {
+    extractGameDataFromForm(form: HTMLFormElement) {
         const title = (form.querySelector('#title') as HTMLInputElement).value;
         const execPath = (form.querySelector('#executablePath') as HTMLInputElement).value;
         const winePrefix = (form.querySelector('#winePrefix') as HTMLInputElement).value;
@@ -154,4 +149,9 @@ export async function initAddGameModal() {
             }
         };
     }
+
+}
+
+if (!customElements.get('modal-add-game')) {
+    customElements.define('modal-add-game', AddGameModal);
 }

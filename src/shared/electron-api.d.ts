@@ -1,4 +1,4 @@
-export interface ElectronAPI {
+interface ElectronAPI {
   invoke(channel: string, data?: any): Promise<any>;
 }
 
@@ -7,3 +7,5 @@ declare global {
     electronAPI: ElectronAPI;
   }
 }
+
+export { };

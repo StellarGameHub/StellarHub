@@ -1,4 +1,4 @@
-import modalHtml from '../../templates/modal-add-roms-scan.html?raw';
+import modalHtml from '../../templates/modals/modal-add-roms-scan.html?raw';
 import { GameCategory, ScanConfig } from '../../../shared/types';
 
 let modalInstance: HTMLDialogElement | null = null;

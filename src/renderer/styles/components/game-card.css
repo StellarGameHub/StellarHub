@@ -2,23 +2,24 @@
     display: block;
     width: var(--card-width);
     min-width: 10rem;
-    height: fit-content;    
+    height: fit-content;
     margin: 10px;
     transition: transform 0.2s;
     cursor: pointer;
-    background: var(--card-bg);
+    background: var(--surface);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .game-card:hover {
     transform: scale(1.05);
-    border: 2px solid var(--accent-hover);
+    background: var(--surface-hover);
+    border: 2px solid var(--border-color);
 
 }
 
 .game-card.selected {
     transform: scale(1.05);
-    border: 2px solid var(--accent-hover);
+    border: 2px solid var(--border-color);
 }
 
 .game-cover {

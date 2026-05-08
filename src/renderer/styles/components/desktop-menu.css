@@ -1,0 +1,63 @@
+.ds-menu {
+    position: relative;
+}
+
+.ds-navbar {
+
+    height: 5lvh;
+    align-items: center;
+    vertical-align: middle;
+    display: flex;
+
+    border: var(--surface-border);
+    background: var(--surface-background);
+    box-shadow: var(--shadow-lg);
+    border-top: none;
+    /* border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius); */
+}
+
+.ds-navbar-logo {
+    padding: 0.25rem;
+    height: 85%;
+    cursor: pointer;
+}
+
+.ds-lateral-menu {
+    width: 15%;
+    min-width: 275px;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    z-index: 2;
+    left: 0;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    height: 100lvh;
+    gap: var(--gap);
+    padding: var(--padding);
+
+    background: var(--surface-background);
+    border: var(--border);
+    box-shadow: var(--shadow-lg);
+    border-top: none;
+    border-left: none;
+}
+
+.ds-lateral-menu.open {
+    transform: translateX(0);
+}
+
+/*FUNCIONA ESTO???*/
+.ds-lateral-menu.open~desktop-content {
+    filter: blur(2px);
+    transition: filter 0.25s;
+}
+
+.ds-search-bar {
+    padding: var(--padding);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    background: var(--bg-color);
+    color: var(--text-color);
+}
