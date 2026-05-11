@@ -1,12 +1,34 @@
-<div class="ds-menu">
+<div id="ds-menu" class="ds-menu">
     <div class="ds-navbar">
-        <img id="ds-navbar-logo" class="ds-navbar-logo" src="/assets/app-icon.png">
-        <input class="ds-search-bar">
+
+        <div id="ds-navbar-brand" class="ds-navbar-brand">
+            <div class="ds-navbar-logo-container">
+                <img id="ds-navbar-logo" class="ds-navbar-logo" src="/assets/icons/app-icon.svg">
+            </div>
+
+            <div class="ds-brand-text-container">
+                <span class="ds-brand-text">StellarHub</span>
+            </div>
+        </div>
+
+        <div class="ds-search-bar-container">
+            <span>
+                <i class="bi bi-search"></i>
+            </span>
+            <input id="ds-search-bar" class="ds-search-bar">
+        </div>
+
+        <span class="spacer"></span>
+        <button id="close-app-btn" class="btn btn-secondary">
+            <i class="bi bi-x-lg"></i>
+            Close
+        </button>
     </div>
     <div id="ds-lateral-menu" class="ds-lateral-menu">
-        <button class="btn btn-primary" id="btn-add-game-modal">Agregar juego manual</button>
-        <button class="btn btn-primary" id="btn-add-category-modal">Ver Categorias</button>
-        <button class="btn btn-primary" id="btn-manage-scans-modal"> Administrar escaneos de ROMs</button>
-        <button class="btn btn-primary" id="btn-toggle-fullscreen">Pantalla Completa</button>
+        <button class="btn btn-primary" id="btn-add-game-modal">Add New Game</button>
+        <button class="btn btn-primary" id="btn-add-category-modal">Game Categories</button>
+        <button class="btn btn-primary" id="btn-scan-manager-modal"> ROMs Scan Manager</button>
+        <button class="btn btn-primary" id="btn-toggle-fullscreen">Fullscreen</button>
+        <button class="btn btn-primary" id="btn-app-settings-modal">App Settings</button>
     </div>
 </div>

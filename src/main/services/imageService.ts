@@ -1,21 +1,34 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { app } from 'electron';
+import { SteamGridImageType } from '../../shared/enums';
 
 
-export async function deleteGameImage(gameId: string, type: 'grid' | 'cover' | 'banner'): Promise<void> {
-    const imagesDir = path.join(app.getPath('userData'), 'images', type);
-    // No asumimos extensión, así que buscamos cualquier archivo que empiece con gameId
-    try {
-        const files = await fs.readdir(imagesDir);
-        for (const file of files) {
-            if (file.startsWith(gameId)) {
-                await fs.unlink(path.join(imagesDir, file));
+//All image types by default
+export async function deleteGameImages(
+    gameId: string,
+    imageTypes: SteamGridImageType[] = [
+        SteamGridImageType.GRID,
+        SteamGridImageType.WIDEGRID,
+        SteamGridImageType.HERO,
+        SteamGridImageType.ICON,
+        SteamGridImageType.LOGO,
+    ]): Promise<void> {
+
+    for (const imageType in imageTypes) {
+        const imagesDir = path.join(app.getPath('userData'), 'images', SteamGridImageType[imageType]);
+
+        try {
+            const files = await fs.readdir(imagesDir);
+            for (const file of files) {
+                if (file.startsWith(gameId)) {
+                    await fs.unlink(path.join(imagesDir, file));
+                }
             }
+        } catch (err) {
+            console.error(`Error deleting image for game ${gameId} of type ${imageType}:`, err);
+            // El directorio o archivo no existe; ignoramos
         }
-    } catch (err) {
-        console.error(`Error deleting image for game ${gameId} of type ${type}:`, err);
-        // El directorio o archivo no existe; ignoramos
     }
 }
 
@@ -25,17 +38,17 @@ export async function saveGameImage(
     gameId: string,
     imageBuffer: Uint8Array,
     imageExt: string,
-    imageType: 'grid' | 'cover' | 'banner'
+    imageType: SteamGridImageType
 ): Promise<string> {
     try {
         // Carpeta destino completa
-        const imagesDir = path.join(app.getPath('userData'), 'images', imageType);
+        const imagesDir = path.join(app.getPath('userData'), 'images', SteamGridImageType[imageType]);
         // Crear directorio si no existe (recursivo por si faltan 'images' también)
         await fs.mkdir(imagesDir, { recursive: true });
 
         // Ruta relativa para guardar en la base de datos
         const fileName = `${gameId}.${imageExt}`;
-        const relativePath = path.join('images', imageType, fileName);
+        const relativePath = path.join('images', SteamGridImageType[imageType], fileName);
         const fullPath = path.join(imagesDir, fileName);
 
         await fs.writeFile(fullPath, Buffer.from(imageBuffer));

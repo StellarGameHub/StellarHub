@@ -7,6 +7,11 @@ const SETTINGS_FILE = path.join(app.getPath('userData'), 'settings.json');
 
 const defaultSettings: AppSettings = {
   launchInFullscreen: false,
+  steamGridDB: {
+    apiKey: undefined,
+    enabled: false
+  },
+  defaultWinePrefix: undefined,
 };
 
 export async function getSettings(): Promise<AppSettings> {

@@ -23,7 +23,7 @@ export async function toggleFullscreenUI() {
   if (!document.fullscreenElement) {
     await document.documentElement.requestFullscreen();
     setUIMode('fullscreen');
-    
+
   } else {
     await document.exitFullscreen();
     setUIMode('desktop');
@@ -31,10 +31,10 @@ export async function toggleFullscreenUI() {
 }
 
 // Sincronizar con cambio de fullscreen nativo (por si el usuario pulsa F11 nativo)
-window.addEventListener('fullscreenchange', () => {
-  if (document.fullscreenElement) {
-    setUIMode('fullscreen');
-  } else {
-    setUIMode('desktop');
-  }
-});
+// window.addEventListener('fullscreenchange', () => {
+//   if (document.fullscreenElement) {
+//     setUIMode('fullscreen');
+//   } else {
+//     setUIMode('desktop');
+//   }
+// });

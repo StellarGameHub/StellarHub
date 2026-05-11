@@ -1,20 +1,36 @@
-import { GameSummary } from '../../shared/types';
-import { GameCard } from '../components/shared/GameCard';
-import { AddCategoryModal } from '../components/desktop/AddCategoryModal';
 import desktopLayoutHTML from './desktop-layout.html?raw';
 
-import '../components/desktop/AddCategoryModal';
-import '../components/desktop/AddGameModal';
+import { Game, GameSummary } from '../../shared/types';
+import { GameCard } from '../components/shared/GameCard';
+import { AddCategoryModal } from '../components/desktop/modals/AddCategoryModal';
+
+import '../components/desktop/modals/AddCategoryModal';
+import '../components/desktop/modals/ScanManagerModal';
+import '../components/desktop/modals/AddGameModal';
+import '../components/desktop/modals/AppSettingsModal';
+import '../components/desktop/GameDetailsPanel';
 import '../components/desktop/DesktopMenu';
+import '../components/shared/GameCard'
+
+import '../utils/uiHelpers'
+
+import { AddGameModal } from '../components/desktop/modals/AddGameModal';
+import { ScanManagerModal } from '../components/desktop/modals/ScanManagerModal';
 
 //clases css
 import '../styles/components/desktop-menu.css'
-import { AddGameModal } from '../components/desktop/AddGameModal';
+import '../styles/components/game-details-panel.css'
+import { AppSettingsModal } from '../components/desktop/modals/AppSettingsModal';
+import { GameDetailsPanel } from '../components/desktop/GameDetailsPanel';
+
 
 export function renderDesktopLayout(games: GameSummary[]): DocumentFragment {
 
-    const template = document.createElement('template');
 
+    //To save the cards
+    const gameCards: HTMLElement[] = [];
+
+    const template = document.createElement('template');
     template.innerHTML = desktopLayoutHTML;
 
     const content = template.content;
@@ -30,24 +46,13 @@ export function renderDesktopLayout(games: GameSummary[]): DocumentFragment {
         card.game = game;
 
         grid.appendChild(card);
-
+        gameCards.push(card);
     });
 
 
     //ESCUCHAR EVENTOS DE LOS COMPONENTES
     const menu = content.querySelector('desktop-menu');
     if (menu) {
-
-        // FULLSCREEN
-
-        menu.addEventListener('toggle-fullscreen', () => {
-            console.log("Esuchando a ToggleFullscreen");
-
-            import('../services/uiMode').then(({ toggleFullscreenUI }) => {
-                toggleFullscreenUI();
-            });
-
-        });
 
         // MODALs
 
@@ -64,6 +69,29 @@ export function renderDesktopLayout(games: GameSummary[]): DocumentFragment {
             addGameModal.open();
         });
 
+        const scanManagerModal = content.querySelector('modal-scan-manager') as ScanManagerModal
+        menu.addEventListener('open-scan-manager-modal', () => {
+            scanManagerModal.open();
+        });
+
+        const appSettingsModal = content.querySelector('modal-app-settings') as AppSettingsModal
+        menu.addEventListener('open-app-settings-modal', () => {
+            appSettingsModal.open();
+        });
+
+        const gameDetailsPanel = content.querySelector("game-details-panel") as GameDetailsPanel
+        window.addEventListener('game-card-selected', (e) => {
+
+            const event = e as CustomEvent;
+            gameDetailsPanel.gameID = event.detail.gameID;
+
+            for (let gameCard of gameCards) {
+                gameCard.classList.remove("selected");
+            }
+
+            (event.detail.gameCard as HTMLElement)?.classList.add("selected")
+
+        });
     }
 
     return content;

@@ -5,39 +5,49 @@
             <div class="spinner"></div>
         </div>
 
-        <div id="modal-form-container" style="display:none;">
+        <div id="modal-form-container" class="modal-form-container">
 
-            <h2>Categorias</h2>
+            <h2>Game Categories</h2>
             <form id="categoies-form">
 
-                <div id="categories-div">
-                    <template id="category-item-template">
-                        <li class="categories-list-item">
-                            <img class="category-icon" src="" alt="Icono de categoría">
-                            <span class="category-name"></span>
-                            <button type="button" class="btn btn-danger">🗑</button>
-                        </li>
-                    </template>
-                    <ul id="categories-list">
-                    </ul>
+                <template id="category-item-template">
+                    <div class="modal-list-item">
+
+                        <!-- Left group: Icon and Text -->
+                        <div class="list-item-info">
+                            <img class="list-item-icon" src="" alt="Category Icon">
+                            <span class="list-item-name"></span>
+                        </div>
+
+                        <!-- Right group: Action Button -->
+                        <button type="button" class="remove-item-btn" aria-label="Remove category">
+                            <i class="bi bi-trash"></i>
+                        </button>
+
+                    </div>
+                </template>
+
+                <div id="categories-list" class="modal-list">
+
+
                 </div>
 
-                <h4>Nueva Categoria</h2>
+                <h4>New Category</h2>
 
                     <div class="form-group">
-                        <label>Nombre:</label>
+                        <label>Name:</label>
                         <input type="text" id="name" required>
                     </div>
 
                     <div class="form-group">
-                        <label>Icono:</label>
+                        <label>Icon:</label>
                         <input type="file" id="iconFile" accept="image/png,image/jpeg,image/jpg,image/webp" required>
                     </div>
 
                     <div class="form-group">
                         <div class="modal-buttons">
-                            <button class="btn btn-secondary" type="button" id="close-modal">Cancelar</button>
-                            <button class="btn btn-primary" type="submit">Guardar</button>
+                            <button class="btn btn-secondary" type="button" id="close-modal">Cancel</button>
+                            <button class="btn btn-primary" type="submit">Save</button>
                         </div>
                     </div>
             </form>

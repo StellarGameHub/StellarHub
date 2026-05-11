@@ -1,63 +1,210 @@
+/* ==========================================================================
+   Base & Menu Wrapper
+   ========================================================================== */
 .ds-menu {
     position: relative;
+    /* Custom timing function for fluid motion across the app */
+    --transition-fluid: 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* ==========================================================================
+   Navbar
+   ========================================================================== */
 .ds-navbar {
-
-    height: 5lvh;
-    align-items: center;
-    vertical-align: middle;
     display: flex;
+    align-items: center;
+    height: 60px;
+    gap: var(--gap);
+    padding: 0 var(--padding);
+    background: var(--surface);
 
-    border: var(--surface-border);
-    background: var(--surface-background);
-    box-shadow: var(--shadow-lg);
-    border-top: none;
-    /* border-bottom-left-radius: var(--border-radius);
-    border-bottom-right-radius: var(--border-radius); */
+    border-bottom: none;
+    box-shadow: none;
+
+    position: relative;
+    z-index: 10;
+}
+
+.ds-navbar::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--surface-elevated);
+    transition: left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+
+.ds-menu.open .ds-navbar::after {
+    left: 273px;
+}
+
+/* ==========================================================================
+   Brand (Logo & Name)
+   ========================================================================== */
+.ds-navbar-brand {
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    gap: var(--gap);
+}
+
+/* --- Container for the sliding text --- */
+.ds-brand-text-container {
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: translateX(-20px);
+    pointer-events: none;
+
+    /* max-width is smoother to animate than fixed width */
+    transition:
+        max-width var(--transition-fluid),
+        transform var(--transition-fluid),
+        opacity 0.3s ease;
+}
+
+.ds-menu.open .ds-brand-text-container {
+    max-width: 250px;
+    /* Gives enough room for the text to reveal */
+    opacity: 1;
+    transform: translateX(0);
+    padding-right: 6rem;
+}
+
+/* --- The actual StellarHub text --- */
+.ds-brand-text {
+    display: inline-block;
+    white-space: nowrap;
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: 0.5px;
+
+    /* Stellar Personality: Space-themed gradient text */
+    background: linear-gradient(135deg, var(--secondary) 0%, var(--tertiary) 10%, var(--primary) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* --- Logo & Animations --- */
+.ds-navbar-logo-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: transform;
+    transition: transform var(--transition-fluid);
 }
 
 .ds-navbar-logo {
-    padding: 0.25rem;
-    height: 85%;
-    cursor: pointer;
+    height: 30px;
+    width: auto;
+    animation: starSpinAndPulse 10s linear infinite;
+    transform-origin: center;
+    backface-visibility: hidden;
+    will-change: transform, filter;
 }
 
+.ds-menu.open .ds-navbar-logo-container {
+    transform: translateX(185px);
+}
+
+@keyframes starSpinAndPulse {
+    0% {
+        transform: rotate(0deg);
+        filter: drop-shadow(0 0 2px rgba(96, 165, 250, 0.4));
+    }
+
+    50% {
+        transform: rotate(180deg);
+        filter: drop-shadow(0 0 10px rgba(167, 139, 250, 0.8));
+        /* Glows mid-spin */
+    }
+
+    100% {
+        transform: rotate(360deg);
+        filter: drop-shadow(0 0 2px rgba(96, 165, 250, 0.4));
+    }
+}
+
+/* ==========================================================================
+   Lateral Menu (Sidebar)
+   ========================================================================== */
 .ds-lateral-menu {
-    width: 15%;
-    min-width: 275px;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    z-index: 5;
+
     display: flex;
     flex-direction: column;
-    position: fixed;
-    z-index: 2;
-    left: 0;
-    transform: translateX(-100%);
-    transition: transform 0.25s ease;
-    height: 100lvh;
-    gap: var(--gap);
-    padding: var(--padding);
+    width: 275px;
+    height: calc(100dvh - 60px);
+    gap: var(--gap, 1rem);
+    padding: var(--padding, 1.5rem);
 
-    background: var(--surface-background);
-    border: var(--border);
-    box-shadow: var(--shadow-lg);
-    border-top: none;
-    border-left: none;
+    background: var(--surface);
+
+    /* Unified border variable to match the navbar's dynamic border */
+    border-right: 1px solid var(--surface-elevated);
+    box-shadow: 0 16px 40px rgb(0 0 0 / 0.4), inset 0 0px 0 rgb(255 255 255 / 0.04);
+
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.ds-lateral-menu.open {
+.ds-menu.open .ds-lateral-menu {
     transform: translateX(0);
 }
 
-/*FUNCIONA ESTO???*/
-.ds-lateral-menu.open~desktop-content {
-    filter: blur(2px);
-    transition: filter 0.25s;
+/* ==========================================================================
+   Search Bar
+   ========================================================================== */
+.ds-search-bar-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.ds-search-bar-container i {
+    position: absolute;
+    left: 1rem;
+    color: var(--text-color);
+    pointer-events: none;
+    /* Prevents icon from blocking input clicks */
+    transition: color 0.3s ease;
+    transform: translateY(-50%);
 }
 
 .ds-search-bar {
-    padding: var(--padding);
+    padding: 0.6rem 1rem 0.6rem 2.75rem;
     border-radius: var(--border-radius);
-    border: 1px solid var(--border-color);
-    background: var(--bg-color);
-    color: var(--text-color);
+    border: 1px solid var(--border-color, #374151);
+    background: var(--bg-color, #1f2937);
+    color: var(--text-color, #f3f4f6);
+    width: 250px;
+    font-size: large;
+    transition:
+        background 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease,
+        width 0.3s ease;
+}
+
+.ds-search-bar::placeholder {
+    color: var(--text-muted);
+}
+
+.ds-search-bar:hover {
+    background: var(--surface-elevated);
+}
+
+.ds-search-bar:focus {
+    outline: none;
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    width: 280px;
 }

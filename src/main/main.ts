@@ -1,4 +1,4 @@
-import { app, BrowserWindow, net, protocol } from 'electron';
+import { app, BrowserWindow, ipcMain, net, protocol } from 'electron';
 import { registerGameHandlers } from './ipc/games';
 import { registerProtonHandlers } from './ipc/proton';
 import { registerSettingsHandlers } from './ipc/settings';
@@ -14,7 +14,7 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
-    //frame:false,
+     frame:false,
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.js'),
       contextIsolation: true,
@@ -24,7 +24,7 @@ function createWindow() {
 
   //Hide Browser Menu
   win.setMenu(null);
-  
+
 
   // En desarrollo, carga el servidor de Vite
   if (process.env.NODE_ENV === 'development') {
@@ -38,8 +38,8 @@ function createWindow() {
 app.whenReady().then(() => {
   console.log('⚡ Backend iniciado correctamente');
 
-  // Registramos el protocolo personalizado para servir imágenes desde el sistema de archivos
-  protocol.handle('estelarhub', (request) => {
+  // Protocol to serve image from relative path
+  protocol.handle('stellarhub', (request) => {
     const url = new URL(request.url);
     // url.pathname será algo como "/images/grid/abc.png"
     const filePath = path.join(app.getPath('userData'), "images", decodeURIComponent(url.pathname));
@@ -59,4 +59,8 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+ipcMain.on('app-quit', () => {
+  app.quit();
 });

@@ -1,14 +1,12 @@
 
-import { saveGameImage } from '../services/imageService'; // para guardar la imagen seleccionada
-import { getGameData, saveGame } from '../services/libraryService'; // para actualizar el juego con la ruta de imagen
-import { ipcMain, app, dialog } from 'electron';    // para app.getPath('userData'), ipcMain.handle y dialog.showOpenDialog
-import fs from 'fs/promises';      // para mkdir, writeFile (versión con promesas)
-import path from 'path';           // para unir rutas
+import { ipcMain } from 'electron';
+import { SteamGridImageType } from '../../shared/enums';
+import { getGameData, saveGame } from '../services/libraryService';
+import { fetchAllGameImages, fetchAndAssignGameImage, fetchImagesForCategories, fetchImagesForGameList } from '../services/imageFetcher';
 
 export function registerImageHandlers() {
 
-    // Maneja la actualización de la ruta de imagen en el juego
-    ipcMain.handle('update-game-image', async (event, { gameId, imagePath, imageType }) => {
+    ipcMain.handle('update-game-image', async (_, { gameId, imagePath, imageType }) => {
         const game = await getGameData(gameId);
         if (game && game.gameImages) {
             switch (imageType) {
@@ -19,5 +17,41 @@ export function registerImageHandlers() {
             await saveGame(game);
         }
         return { success: true };
+    });
+
+    ipcMain.handle('fetch-game-image', async (_, gameId: string, imageType: SteamGridImageType) => {
+        const success = await fetchAndAssignGameImage(gameId, imageType);
+        return { success };
+    });
+
+    // ipc/images.ts
+    ipcMain.handle('fetch-all-game-images', async (_, gameId: string, imageTypes: SteamGridImageType[]) => {
+        let success = false;
+        if (imageTypes) {
+            success = await fetchAllGameImages(gameId, imageTypes);
+        } else {
+            success = await fetchAllGameImages(gameId);
+        }
+        return { success };
+    });
+
+    ipcMain.handle('fetch-images-for-game-list', async (_, gameIds: string[], imageTypes: SteamGridImageType[]) => {
+        let result;
+        if (imageTypes) {
+            result = await fetchImagesForGameList(gameIds, imageTypes);
+        } else {
+            result = await fetchImagesForGameList(gameIds);
+        }
+        return result;
+    });
+
+    ipcMain.handle('fetch-images-for-categories', async (_, categoryIds: string[], imageTypes: SteamGridImageType[]) => {
+        let result;
+        if (imageTypes) {
+            result = await fetchImagesForCategories(categoryIds, imageTypes);
+        } else {
+            result = await fetchImagesForCategories(categoryIds);
+        }
+        return result;
     });
 }

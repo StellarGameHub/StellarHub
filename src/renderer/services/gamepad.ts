@@ -1,37 +1,46 @@
 // src/renderer/services/gamepad.ts
 let active = false;
 let animationId: number | null = null;
-let onDirectionChange: ((dx: number, dy: number) => void) | null = null;
-let onAccept: (() => void) | null = null;
-let onBack: (() => void) | null = null;
+let callbacks: {
+  onDirectionChange?: (dx: number, dy: number, buttons: readonly GamepadButton[]) => void;
+  onAccept?: () => void;
+  onBack?: () => void;
+  onHome?: () => void;   // nuevo
+} = {};
+
+
 
 export function startGamepadListening(
-  callbacks: {
-    onDirectionChange?: (dx: number, dy: number) => void;
+  newCallbacks: {
+    onDirectionChange?: (dx: number, dy: number, buttons: readonly GamepadButton[]) => void;
     onAccept?: () => void;
     onBack?: () => void;
+    onHome: () => void,
   }
 ) {
   if (active) return;
   active = true;
-  onDirectionChange = callbacks.onDirectionChange || null;
-  onAccept = callbacks.onAccept || null;
-  onBack = callbacks.onBack || null;
+  callbacks = newCallbacks;
 
   function pollGamepad() {
     if (!active) return;
     const gamepads = navigator.getGamepads();
-    const gp = gamepads[0]; // solo el primer mando conectado
+    const gp = gamepads[0]; // primer mando conectado
     if (gp) {
       const axes = gp.axes;
-      const dx = Math.abs(axes[0]) > 0.2 ? axes[0] : 0;
-      const dy = Math.abs(axes[1]) > 0.2 ? axes[1] : 0;
-      if ((dx !== 0 || dy !== 0) && onDirectionChange) {
-        onDirectionChange(dx, dy);
+      let dx = Math.abs(axes[0]) > 0.2 ? axes[0] : 0;
+      let dy = Math.abs(axes[1]) > 0.2 ? axes[1] : 0;
+      if (callbacks.onDirectionChange) {
+        callbacks.onDirectionChange(dx, dy, gp.buttons);
       }
       const buttons = gp.buttons;
-      if (buttons[0]?.pressed && onAccept) onAccept();        // Botón A (cross)
-      if (buttons[1]?.pressed && onBack) onBack();           // Botón B (circle)
+      if (buttons[0]?.pressed && callbacks.onAccept) callbacks.onAccept();   // Botón A (cross)
+      if (buttons[1]?.pressed && callbacks.onBack) callbacks.onBack();      // Botón B (circle)
+
+      const homeButtonIndex = 16; // común en la mayoría
+      if (buttons[homeButtonIndex]?.pressed && callbacks.onHome) {
+        callbacks.onHome();
+      }
     }
     animationId = requestAnimationFrame(pollGamepad);
   }

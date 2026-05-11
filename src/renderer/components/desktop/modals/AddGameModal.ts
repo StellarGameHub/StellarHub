@@ -1,5 +1,5 @@
-import { privateDecrypt } from 'node:crypto';
-import modalHtml from '../../templates/modals/modal-add-game.html?raw';
+import { restoreButtonLoading, setButtonLoading, withButtonLoading } from '../../../utils/uiHelpers';
+import modalHtml from '/templates/modals/modal-add-game.html?raw';
 
 
 export class AddGameModal extends HTMLElement {
@@ -19,33 +19,64 @@ export class AddGameModal extends HTMLElement {
     }
 
     private attachEvents() {
+
+        // FORM SUBMIT EVENT
         const form = this.dialog.querySelector('#manual-game-form') as HTMLFormElement;
         form?.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Leer archivo de imagen si existe
-            const fileInput = document.getElementById('gridImageFile') as HTMLInputElement;
-            let imageBuffer: ArrayBuffer | null = null;
-            let imageExt: string | null = null;
+            const submitButton = this.dialog.querySelector("button[type=submit]") as HTMLButtonElement
 
-            if (fileInput.files && fileInput.files[0]) {
-                imageExt = fileInput.files[0].name.split('.').pop() || 'png';
-                imageBuffer = await fileInput.files[0].arrayBuffer(); // Leer el archivo como ArrayBuffer
+            if (submitButton) {
+
+                await withButtonLoading(submitButton, (async () => {
+
+                    // Leer archivo de imagen si existe
+                    const fileInput = this.dialog.querySelector('#gridImageFile') as HTMLInputElement;
+                    let imageBuffer: ArrayBuffer | null = null;
+                    let imageExt: string | null = null;
+
+                    if (fileInput.files && fileInput.files[0]) {
+                        imageExt = fileInput.files[0].name.split('.').pop() || 'png';
+                        imageBuffer = await fileInput.files[0].arrayBuffer(); // Leer el archivo como ArrayBuffer
+                    }
+                    const gameData = this.extractGameDataFromForm(form);
+
+                    console.log("AddGameModal, Post, GameData:", gameData)
+
+                    const createResult = await window.electronAPI.invoke('add-manual-game', { gameData, imageBuffer, imageExt });
+                    if (createResult.success) {
+                        window.dispatchEvent(new CustomEvent('games-updated'));
+                        this.dialog.close();
+                        form.reset();
+                    } else {
+                        alert('Error: ' + createResult.error);
+                    }
+
+                })());
+
             }
-            const gameData = this.extractGameDataFromForm(form);
 
-            console.log("AddGameModal, Post, GameData:", gameData)
-
-            const createResult = await window.electronAPI.invoke('add-manual-game', { gameData, imageBuffer, imageExt });
-            if (createResult.success) {
-                window.dispatchEvent(new CustomEvent('games-updated'));
-                this.dialog.close();
-                form.reset();
-            } else {
-                alert('Error: ' + createResult.error);
-            }
         });
 
+        // BROWSE GAME BUTTON EVENT
+
+        const browseGameBtn = this.querySelector('#btn-browse-game');
+        browseGameBtn?.addEventListener('click', async () => {
+            const file = await window.electronAPI.invoke('select-file');
+            if (file) {
+                (this.querySelector('#executablePath') as HTMLInputElement).value = file;
+            }
+        });
+        // BROWSE PREFIX BUTTON EVENT
+        const browsePrefixBtn = this.querySelector('#btn-browse-prefix');
+        browsePrefixBtn?.addEventListener('click', async () => {
+            const file = await window.electronAPI.invoke('select-folder');
+            if (file) {
+                (this.querySelector('#winePrefix') as HTMLInputElement).value = file;
+            }
+        });
+        // CLOSE MODAL BUTON
         const closeBtn = this.querySelector('#close-modal');
 
         closeBtn?.addEventListener('click', () => {

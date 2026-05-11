@@ -1,0 +1,84 @@
+<div class="game-details-panel hidden" id="game-details-panel">
+    <div class="gdp-hero-conatiner">
+        <img id="gdp-hero-image" class="gdp-hero"
+            src="">
+        <img id="gdp-logo-image" class="gdp-logo"
+            src="">
+        <span id="span-category" class="gdp-span-category">
+
+        </span>
+    </div>
+    <div class="gdp-buttons-container">
+        <button id="btn-gdp-play" class="btn btn-primary">
+            <i class="bi bi-play-fill"></i>
+            <span>Play</span>
+        </button>
+
+        <div class="gdp-game-info">
+            <i class="bi bi-clock"></i>
+            <div>
+                <strong>PLAY TIME</strong>
+                <span><span id="span-play-time"></span> hours</span>
+            </div>
+        </div>
+
+        <div class="gdp-game-info">
+            <i class="bi bi-clock-history"></i>
+            <div>
+                <strong>LAST PLAYED</strong>
+                <span id="span-last-played"></span>
+            </div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div id="gdp-config-menu" class="dropdown gdp-config-button">
+            <button class="btn btn-secondary" id="btn-gdp-menu">
+                <i class="bi bi-gear-fill"></i>
+            </button>
+
+            <div class="gdp-config-menu dropdown-content">
+                <button class="btn btn-secondary w-100">Editar</button>
+                <button id="btn-gdp-delete" class="btn btn-danger w-100">Eliminar</button>
+            </div>
+        </div>
+
+
+    </div>
+    <div class="gdp-details-container">
+        <div class="gdp-details-column">
+            <div class="gdp-details-item">
+                <span class="gdp-details-item-title">
+                    Developer
+                </span>
+                <span id="gdp-span-developer" class="gdp-details-item-content"></span>
+            </div>
+            <div class="gdp-details-item">
+                <span class="gdp-details-item-title">
+                    Publisher
+                </span>
+                <span id="gdp-span-publisher" class="gdp-details-item-content"></span>
+            </div>
+            <div class="gdp-details-item">
+                <span class="gdp-details-item-title">
+                    Release Year
+                </span>
+                <span id="gdp-span-year" class="gdp-details-item-content"></span>
+            </div>
+            <div class="gdp-details-item">
+                <span class="gdp-details-item-title">
+                    Genres
+                </span>
+                <span id="gdp-span-genres" class="gdp-details-item-content"></span>
+            </div>
+        </div>
+        <div class="gdp-details-column">
+            <div class="gdp-details-item">
+                <span class="gdp-details-item-title">
+                    Description
+                </span>
+                <span id="gdp-span-description" class="gdp-details-item-content"></span>
+            </div>
+        </div>
+    </div>
+</div>

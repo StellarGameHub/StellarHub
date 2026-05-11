@@ -10,6 +10,10 @@ import { renderFullscreenLayout } from './layouts/FullscreenLayout'; // Importar
 import { setUIMode } from './services/uiMode'; // Funcion para setear el modo UI desde la configuración
 import { startGamepadListening, stopGamepadListening } from './services/gamepad'; // Funciones para manejar gamepad
 
+//Importar bootstrap-icons
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
+
 //Cargar estilos globales
 import './styles/base.css';
 import './styles/fullscreen.css';
@@ -18,19 +22,64 @@ import './styles/components/game-card.css';
 import './styles/components/modal.css';
 
 //Cargar componentes
-import './components/shared/GameCard';
-import './components/desktop/AddGameModal';
-import './components/desktop/AddCategoryModal';
-import './components/desktop/AddScanConfigModal';
-import './components/desktop/ScanManagerModal';
 import './components/desktop/DesktopMenu';
 
-
-import { initScanManagerModal } from './components/desktop/ScanManagerModal';
-
-// Configuración específica del gamepad para el modo fullscreen (se llama cada vez que se entra a ese modo)
+// ----------------------------------------------
+// GAMEPAD NAVEGATION (fullscreen)
+// ----------------------------------------------
 let currentSelectedIndex = 0;
 let cleanupGamepad: (() => void) | null = null;
+//COOLDOWN TO MOVE GAMEPAD ON FULLSCREEN
+const MOVE_COOLDOWN_MS = 200; // milisegundos entre cambios
+let lastMoveTime = 0;
+//COOLDOWN TO OPEN GAME
+const ACCEPT_COOLDOWN_MS = 500; // medio segundo
+let lastAcceptTime = 0;
+
+function updateSelection() {
+  const cards = document.querySelectorAll('.game-card');
+  cards.forEach((card, idx) => {
+    if (idx === currentSelectedIndex) {
+      card.classList.add('selected');
+      window.dispatchEvent(new CustomEvent('game-selected', {
+        bubbles: true,
+        composed: true,
+        detail: card.getAttribute('data-game-id')
+      }));
+    } else {
+      card.classList.remove('selected');
+    }
+  });
+  const selectedCard = cards[currentSelectedIndex] as HTMLElement;
+  if (selectedCard) {
+    selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function moveSelection(delta: number) {
+  const cards = document.querySelectorAll('.game-card');
+  if (cards.length === 0) return;
+  const now = Date.now();
+  if (now - lastMoveTime < MOVE_COOLDOWN_MS) return;
+  lastMoveTime = now;
+  currentSelectedIndex = (currentSelectedIndex + delta + cards.length) % cards.length;
+  updateSelection();
+}
+
+function handleGamepadDirection(dx: number, dy: number, buttons: readonly GamepadButton[]) {
+  let delta = 0;
+  // Stick izquierdo horizontal
+  if (Math.abs(dx) > 0.5) {
+    delta = dx > 0 ? 1 : -1;
+  } else {
+    // D-pad (botones estándar: izquierda=14, derecha=15)
+    if (buttons[14]?.pressed) delta = -1;
+    else if (buttons[15]?.pressed) delta = 1;
+  }
+  if (delta !== 0) {
+    moveSelection(delta);
+  }
+}
 
 export function setupFullscreenGamepad() {
   // Limpiar listener anterior si existe
@@ -39,43 +88,23 @@ export function setupFullscreenGamepad() {
     cleanupGamepad = null;
   }
 
-  // Función para actualizar la selección visual (se re-ejecuta tras re-render)
-  const updateSelection = () => {
-    const cards = document.querySelectorAll('.game-card');
-    cards.forEach((card, idx) => {
-      if (idx === currentSelectedIndex) card.classList.add('selected');
-      else card.classList.remove('selected');
-    });
-    // Scroll al elemento seleccionado si está fuera de vista
-    const selectedCard = cards[currentSelectedIndex] as HTMLElement;
-    if (selectedCard) {
-      selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  };
-
-  // Iniciar escucha de gamepad con callbacks
+  // Iniciar escucha de gamepad con callbacks mejorados
   startGamepadListening({
-    onDirectionChange: (dx, dy) => {
-      // Movimiento horizontal (left stick X)
-      if (Math.abs(dx) > 0.5) {
-        const cards = document.querySelectorAll('.game-card');
-        if (cards.length === 0) return;
-        currentSelectedIndex = (currentSelectedIndex + (dx > 0 ? 1 : -1) + cards.length) % cards.length;
-        updateSelection();
-      }
-      // Opcional: movimiento vertical si quisieras grid 2D
-    },
+    onDirectionChange: handleGamepadDirection,
     onAccept: () => {
+      const now = Date.now();
+      if (now - lastAcceptTime < ACCEPT_COOLDOWN_MS) return;
+      lastAcceptTime = now;
       const cards = document.querySelectorAll('.game-card');
-      const gameId = cards[currentSelectedIndex]?.getAttribute('data-id');
+      const gameId = cards[currentSelectedIndex]?.getAttribute('data-game-id');
       if (gameId) launchGame(gameId);
     },
     onBack: () => {
-      toggleFullscreenUI(); // Salir del fullscreen
+      toggleFullscreenUI();
     },
+    onHome: () => toggleFullscreenUI(),
   });
 
-  // Guardar función de limpieza
   cleanupGamepad = () => {
     stopGamepadListening();
   };
@@ -85,7 +114,7 @@ export function setupFullscreenGamepad() {
 }
 
 async function initLayoutFromSettings() {
-  const settings = await window.electronAPI.invoke('get-settings');
+  const settings = await window.electronAPI.invoke('get-app-settings');
   if (settings.launchInFullscreen) {
     console.log('Launching in fullscreen mode');
     // Activar fullscreen nativo y modo UI
@@ -127,7 +156,6 @@ async function renderCurrentLayout() {
     currentLayout = renderDesktopLayout(games);
     appContainer.replaceChildren(currentLayout);
 
-    initScanManagerModal(); // Inicializar modal de Escaneos de Roms
     stopGamepadListening(); // Aseguramos que el gamepad no escuche en modo escritorio    
   } else {
     currentLayout = renderFullscreenLayout(games);
@@ -139,16 +167,14 @@ async function renderCurrentLayout() {
 
 }
 
-// Escuchar cambios de modo (fullscreen/desktop)
-onUIModeChange(() => {
-  renderCurrentLayout();
-});
+onUIModeChange(async (mode) => {
+  setUIMode(mode)
+  await renderCurrentLayout()
+})
 
-// Botón de alternar fullscreen (desde el escritorio)
-const fullscreenBtn = document.getElementById('fullscreen-btn');
-if (fullscreenBtn) {
-  fullscreenBtn.addEventListener('click', () => toggleFullscreenUI());
-}
+window.addEventListener('toggle-fullscreen', async () => {
+  await toggleFullscreenUI();
+});
 
 // Tecla F11
 window.addEventListener('keydown', (e) => {
@@ -164,3 +190,18 @@ window.addEventListener('games-updated', () => {
 
 
 initLayoutFromSettings();
+
+
+//PROVISIONAL /// REWORK DE MANDO COMPLETAMENTE, TODO JUNTO ACA NO ENTIENDO ANDA
+// Teclado: flechas izquierda/derecha (y opcional arriba/abajo para grid futuro)
+window.addEventListener('keydown', (e) => {
+  const mode = getUIMode();
+  if (mode !== 'fullscreen') return;
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    moveSelection(-1);
+  } else if (e.key === 'ArrowRight') {
+    e.preventDefault();
+    moveSelection(1);
+  }
+});

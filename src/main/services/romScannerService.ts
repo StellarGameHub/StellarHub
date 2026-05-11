@@ -2,7 +2,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { ScanConfig, RomGame } from '../../shared/types';
 import { getGames, saveGames } from './libraryService';
-import { GameSource } from '../../shared/enums';
+import { GameCompletionStatus, GameSource } from '../../shared/enums';
+import { fetchImagesForGameList } from './imageFetcher';
 
 /**
  * Escanea una carpeta según la configuración y actualiza la biblioteca.
@@ -10,8 +11,15 @@ import { GameSource } from '../../shared/enums';
  */
 export async function runScan(config: ScanConfig): Promise<{ added: number; removed: number }> {
     const allGames = await getGames();
+
     const existingRoms = allGames.filter(g => g.source === GameSource.ROM && g.romDetails?.scanConfigId === config.id) as RomGame[];
-    const existingPaths = new Map(existingRoms.map(g => [g.romDetails.romPath, g]));
+
+    const existingPaths = new Map(
+        existingRoms
+            .filter(g => g.romDetails?.romPath)
+            .map(g => [g.romDetails!.romPath, g])
+    );
+
 
     // 1. Obtener archivos ROMs en la carpeta
     let currentFiles: string[] = [];
@@ -33,11 +41,13 @@ export async function runScan(config: ScanConfig): Promise<{ added: number; remo
     // 2. Detectar nuevos juegos
     for (const romPath of currentFiles) {
         if (!existingPaths.has(romPath)) {
-            const gameId = `rom-${config.id}-${Date.now()}-${Math.random().toString(36)}`;
+            const gameId = `rom-${config.id}-${crypto.randomUUID()}`;
             const fileName = path.basename(romPath, path.extname(romPath));
+
             const newGame: RomGame = {
                 id: gameId,
                 categories: config.categories || [],
+                completionStatus: GameCompletionStatus.PENDING,
                 isHidden: false,
                 title: fileName,
                 description: '',
@@ -46,10 +56,11 @@ export async function runScan(config: ScanConfig): Promise<{ added: number; remo
                 releaseYear: undefined,
                 genres: [],
                 gameImages: {
-                    grid: '', //BUSCAR EN STEAMGRIDDB?
-                    cover: '',
-                    background: '',
-                    banner: '',
+                    grid: '',
+                    wideGrid: '',
+                    hero: '',
+                    icon: '',
+                    logo: ''
                 },
                 isInstalled: true,
                 source: GameSource.ROM,
@@ -78,12 +89,33 @@ export async function runScan(config: ScanConfig): Promise<{ added: number; remo
         }
     }
 
+
+
     // 4. Guardar cambios
     const updatedGames = [
-        ...allGames.filter(g => !existingPaths.has(g.id) && !removed.includes(g.id)), // los que no son de este escaneo ni fueron eliminados
-        ...added, // los nuevos
-        ...existingRoms.map(g => g) // los modificados (isInstalled)
+        ...allGames.filter(g => !(g.source === GameSource.ROM && g.romDetails?.scanConfigId === config.id)),
+        ...existingRoms,
+        ...added,
     ];
+
+
+    console.log("ALL", allGames.length);
+    console.log("EXISTING ROMS", existingRoms.length);
+    console.log("ADDED", added.length);
+
+    console.log(
+        "UPDATED IDS",
+        updatedGames.map(g => g.id)
+    );
+
+    console.log(
+        "DUPLICATES",
+        updatedGames
+            .map(g => g.id)
+            .filter((id, i, arr) => arr.indexOf(id) !== i)
+    );
+    
     await saveGames(updatedGames);
+    fetchImagesForGameList(added.map(rom => rom.id));
     return { added: added.length, removed: removed.length };
 }

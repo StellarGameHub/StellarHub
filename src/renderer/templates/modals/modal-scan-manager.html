@@ -1,25 +1,27 @@
-<div class="modal-content">
-    <h3>Escaneo de ROMS</h3>
-    <div id="div-scan-manager-content">
+<dialog>
+    <div class="modal-content">
+        <h3>Escaneo de ROMS</h3>
+        <div id="div-scan-manager-content">
 
+        </div>
+
+        <button class="btn btn-primary" id="btn-add-new-scan">+ Nuevo</button>
+        <button class="btn btn-secondary" id="btn-close-scan-manager">Cerrar</button>
     </div>
 
-    <button class="btn btn-primary" id="btn-add-new-scan">+ Nuevo</button>
-    <button class="btn btn-secondary" id="btn-close-scan-manager">Cerrar</button>
-</div>
 
-
-<template id="template-scan-config-item">
-    <div class="scan-config-item" data-id="${config.id}">
-        <div class="config-info">
-            <strong class="system-name"></strong>
-            <span class="roms-folder"></span>
-            <span class="enabled"></span>
+    <template id="template-scan-config-item">
+        <div class="scan-config-item" data-id="${config.id}">
+            <div class="config-info">
+                <strong class="system-name"></strong>
+                <span class="roms-folder"></span>
+                <span class="enabled"></span>
+            </div>
+            <div class="config-actions">
+                <button class="btn edit-config">✏️ Editar</button>
+                <button class="btn delete-config">🗑️ Eliminar</button>
+                <button class="btn run-scan">🔄 Escanear ahora</button>
+            </div>
         </div>
-        <div class="config-actions">
-            <button class="btn edit-config">✏️ Editar</button>
-            <button class="btn delete-config">🗑️ Eliminar</button>
-            <button class="btn run-scan">🔄 Escanear ahora</button>
-        </div>
-    </div>
-</template>
+    </template>
+</dialog>

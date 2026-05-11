@@ -1,43 +1,36 @@
-.fs-layout {
-  position: fixed;
-  top: 0;
-  left: 0;
+.theme-fullscreen {
+  --bg-color: #000;
+}
+
+.fs-background {
+  flex: 1;
+  overflow: hidden;
   width: 100%;
-  height: 100%;
-  background: #000;
-  color: white;
-  overflow-y: auto;
+  position: relative;
+  display: flex;
+}
+
+.fs-image {
+  object-fit: contain;
+  width: 100%;
+  aspect-ratio: 96/31;
+}
+
+.fs-logo {
+  width: 25lvw;
+  position: absolute;
+  bottom: 0;
+  left: 0;
   padding: 1rem;
+  margin: 10lvh 5lvw;
 }
 
 .fs-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
+  height: fit-content;
+  display: flex;
+  overflow-y: hidden;
+  gap: var(--gap);
+  padding: var(--padding);
 }
 
-.fs-game-card {
-  cursor: pointer;
-  text-align: center;
-  transition: transform 0.2s;
-}
-.fs-game-card:hover, .fs-game-card.selected {
-  transform: scale(1.05);
-  border: 2px solid white;
-}
-.fs-game-card img {
-  width: 100%;
-  aspect-ratio: 2/3;
-  object-fit: cover;
-  border-radius: 12px;
-}
-
-.fs-btn {
-  background: rgba(255,255,255,0.2);
-  border: none;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-}
+.fs-grid .game-card {}

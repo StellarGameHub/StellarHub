@@ -1,37 +1,93 @@
+:root {
+    --border-width: 2px;
+}
+
 .game-card {
+    position: relative;
+    /* Required to absolute position .game-info */
     display: block;
-    width: var(--card-width);
+    width: 17%;
     min-width: 10rem;
-    height: fit-content;
     margin: 10px;
-    transition: transform 0.2s;
+    height: fit-content;
+
+    /* Expanding transition to smoothly animate shadows and borders */
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+
     cursor: pointer;
     background: var(--surface);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    border: var(--border-width) solid transparent;
+    border-radius: var(--border-radius);
+    /* Using your existing medium shadow variable for the base state */
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
 }
 
 .game-card:hover {
     transform: scale(1.05);
     background: var(--surface-hover);
-    border: 2px solid var(--border-color);
-
+    border: var(--border-width) solid var(--border-color);
+    /* Elevate shadow on hover */
+    box-shadow: var(--shadow-lg);
+    /* Bring card to front so it overlaps neighbors smoothly */
+    z-index: 2;
 }
 
+/* === MODERN GLOW EFFECT FOR SELECTED STATE === */
 .game-card.selected {
+    border-color: var(--primary);
+    /* Keep it slightly popped out even when not hovering */
+    transform: scale(1.03);
+    z-index: 1;
+    /* Stacking shadows for depth and glow:
+       1. Dark drop shadow for depth
+       2. Crisp, vibrant inner glow
+       3. Soft, diffused outer glow */
+    box-shadow:
+        0 12px 24px color-mix(in srgb, var(--primary) 10%, transparent),
+        0 0 15px color-mix(in srgb, var(--primary) 20%, transparent),
+        0 0 35px color-mix(in srgb, var(--primary) 30%, transparent);
+}
+
+.game-card.selected:hover {
+    /* Combine both the hover scale and the selected glow */
     transform: scale(1.05);
-    border: 2px solid var(--border-color);
+    z-index: 2;
 }
 
 .game-cover {
     width: 100%;
     aspect-ratio: 2/3;
     object-fit: cover;
-
+    display: block;
 }
 
 .game-info {
-    padding: 12px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    /* Slightly darker base background */
+    background: rgba(11, 14, 20, 0.75);
+    /* Modern glassmorphism blur effect */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: var(--padding);
     text-align: center;
+    /* Hidden by default */
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    /* Prevent clicks when hidden */
+    pointer-events: none;
+}
+
+/* Show .game-info on hover */
+.game-card:hover .game-info {
+    opacity: 1;
+    /* Re-enable clicks for buttons */
+    pointer-events: auto;
 }
 
 .game-title {
@@ -40,27 +96,15 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* Make text stand out against the blurred background */
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.game-developer,
-.game-year {
-    font-size: 0.75rem;
-    color: #aaa;
-    margin: 2px 0;
-}
-
-.play-button {
-    background: var(--accent);
-    margin-top: 8px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-}
-
-.delete-button {
-    background: var(--accent);
-    margin-top: 8px;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
+.game-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    padding: var(--padding);
+    transition: background 0.2s;
 }

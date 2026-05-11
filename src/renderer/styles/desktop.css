@@ -16,18 +16,12 @@
   height: 100%;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gap);
   overflow-y: auto;
   overflow-x: hidden;
+  flex: 1;
+  z-index: 1;
 }
 
-.ds-details-panel {
-  background-color: var(--surface);
-  color: var(--text-color);
-  height: 100%;
-  padding: var(--padding);
-  border-radius: var(--border-radius);
-}
 
 desktop-content {
   display: flex;
@@ -39,17 +33,27 @@ desktop-content {
   padding: var(--padding);
 }
 
-.desktop-background {
+.ds-background {
   position: absolute;
   height: 100%;
   width: 100%;
-  z-index: -1;
+  z-index: 0;
   top: 0;
   left: 0;
+  overflow: hidden;
+}
 
-  filter: blur(10px) opacity(0.1);
+.ds-background-img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(3px);
+  transform: scale(1.1);
+  opacity: 0.25;
+  transition: opacity 0.3s ease-in-out;
+}
 
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
+.ds-background-img.fade-out {
+  opacity: 0.05;
 }

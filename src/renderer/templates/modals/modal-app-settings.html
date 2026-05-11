@@ -1,0 +1,35 @@
+<dialog id="app-settings-modal">
+  <div class="modal-content">
+    <h2>StellarHub Settings</h2>
+    <div id="modal-loading" style="text-align:center; padding:2rem;">
+      <div class="spinner"></div>
+      <p>Loading settings...</p>
+    </div>
+    <div id="modal-form-container" style="display:none;">
+      <form id="settings-form">
+        <div >
+          <label>
+            <input type="checkbox" id="steamgriddb-enabled"> Enable SteamGridDB
+          </label>
+          <div class="form-group" id="steamgriddb-api-group" >
+            <label>SteamGridDB API Key</label>
+            <input type="text" id="steamgriddb-api-key" placeholder="Enter your API key">
+            <div class="help-text">
+              Get your API key from <a href="https://www.steamgriddb.com/profile/preferences/api"
+                target="_blank">steamgriddb.com</a>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="launch-fullscreen"> Start in fullscreen
+          </label>
+        </div>
+        <div class="modal-buttons">
+          <button class="btn btn-secondary" type="button" id="close-settings-modal">Cancelar</button>
+          <button class="btn btn-primary" type="submit">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</dialog>

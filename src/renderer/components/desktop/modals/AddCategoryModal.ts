@@ -1,5 +1,6 @@
-import { GameCategory } from '../../../shared/types';
-import modalHtml from '../../templates/modals/modal-add-category.html?raw';
+import { GameCategory } from '../../../../shared/types';
+import modalHtml from '/templates/modals/modal-add-category.html?raw';
+
 
 export class AddCategoryModal extends HTMLElement {
 
@@ -142,28 +143,28 @@ export class AddCategoryModal extends HTMLElement {
 
     private populateCategoriesList(categories: GameCategory[]) {
 
-        const list = this.querySelector('#categories-list') as HTMLElement;
+        const categoriesList = this.querySelector('#categories-list') as HTMLElement;
 
-        if (!list) return;
+        if (!categoriesList) return;
 
-        list.innerHTML = '';
+        categoriesList.innerHTML = '';
 
         const template = this.querySelector('#category-item-template') as HTMLTemplateElement;
 
         for (const category of categories) {
 
-            const li = template.content.cloneNode(true) as HTMLElement;
+            const listItem = template.content.cloneNode(true) as HTMLElement;
 
-            li.querySelector('.category-icon')
-                ?.setAttribute('src', `estelarhub://${category.icon}`);
+            listItem.querySelector('.list-item-icon')
+                ?.setAttribute('src', `stellarhub://${category.icon}`);
 
-            const name = li.querySelector('.category-name');
+            const name = listItem.querySelector('.list-item-name');
 
             if (name) {
                 name.textContent = category.name;
             }
 
-            li.querySelector('.remove-category-btn')
+            listItem.querySelector('.remove-item-btn')
                 ?.addEventListener('click', async () => {
 
                     try {
@@ -176,7 +177,7 @@ export class AddCategoryModal extends HTMLElement {
                         await this.loadCategories();
 
                     } catch (error) {
-
+                        //ADD TOAST OR DIALOG OR SOMETHING
                         console.error(
                             'Error removing category:',
                             (error as Error).message
@@ -186,7 +187,7 @@ export class AddCategoryModal extends HTMLElement {
 
                 });
 
-            list.appendChild(li);
+            categoriesList.appendChild(listItem);
 
         }
 

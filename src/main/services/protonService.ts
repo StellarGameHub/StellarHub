@@ -7,10 +7,10 @@ const execPromise = promisify(exec);
 
 // Directorios comunes donde pueden estar las versiones de Proton
 const PROTON_PATHS = [
-  path.join(process.env.HOME || '~', '.steam/root/compatibilitytools.d'),
+  // path.join(process.env.HOME || '~', '.steam/root/compatibilitytools.d'),
   path.join(process.env.HOME || '~', '.local/share/Steam/compatibilitytools.d'),
-  path.join(process.env.HOME || '~', '.steam/steam/steamapps/common'),
-  path.join(process.env.HOME || '~', '.steam/debian-installation/steamapps/common'),
+  // path.join(process.env.HOME || '~', '.steam/steam/steamapps/common'),
+  // path.join(process.env.HOME || '~', '.steam/debian-installation/steamapps/common'),
   '/usr/share/steam/compatibilitytools.d',  // si instalado por paquete
 ];
 

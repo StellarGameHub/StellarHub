@@ -1,25 +1,28 @@
 import { ipcMain } from 'electron';
-import { GameSource } from '../../shared/enums';
-import { ExecutableGame, Game, LaunchConfig } from '../../shared/types';
+import { GameSource, SteamGridImageType } from '../../shared/enums';
+import { ExecutableGame, Game, LaunchConfig, RomGame } from '../../shared/types';
 import { saveGameImage } from '../services/imageService';
-import { launchEmulator, launchManualGame } from '../services/gameLauncher';
+import { killGame, launchEmulator, launchManualGame } from '../services/gameLauncher';
 import { getGames, getGameData, saveGame, getLaunchConfig, updatePlaytime, deleteGame } from '../services/libraryService';
+import { fetchAllGameImages } from '../services/imageFetcher';
 
 export function registerGameHandlers() {
     ipcMain.handle('get-games-summary', async () => {
-        return getGames();
+        let games = await getGames();
+        games = games.sort((a, b) => a.title.localeCompare(b.title));
+        return games;
     });
 
-    ipcMain.handle('get-game-detail', async (event, id: string) => {
+    ipcMain.handle('get-game-detail', async (_, id: string) => {
         return getGameData(id);
     });
 
-    ipcMain.handle('save-game-detail', async (event, game) => {
+    ipcMain.handle('save-game-detail', async (_, game) => {
         await saveGame(game);
         return { success: true };
     });
 
-    ipcMain.handle('add-manual-game', async (event, payload) => {
+    ipcMain.handle('add-manual-game', async (_, payload) => {
         console.log('Received add-manual-game with payload:', payload);
         try {
             const { gameData, imageBuffer, imageExt } = payload;
@@ -33,7 +36,7 @@ export function registerGameHandlers() {
             let gridImagePath = '';
 
             if (imageBuffer && imageExt) {
-                gridImagePath = await saveGameImage(newId, imageBuffer, imageExt, 'grid');
+                gridImagePath = await saveGameImage(newId, imageBuffer, imageExt, SteamGridImageType.GRID);
             }
 
             const newGame: ExecutableGame = {
@@ -48,6 +51,7 @@ export function registerGameHandlers() {
             };
 
             await saveGame(newGame);
+            await fetchAllGameImages(newGame.id);
             return { success: true, gameId: newId };
         } catch (error) {
             return { success: false, error: (error as Error).message };
@@ -55,44 +59,34 @@ export function registerGameHandlers() {
     });
 
 
-    ipcMain.handle('launch-game-by-id', async (event, gameId: string) => {
+    ipcMain.handle('launch-game-by-id', async (_, gameId: string) => {
         try {
-            const gameData = await getGameData(gameId) as Game;
+            const game = await getGameData(gameId);
+            if (!game) throw new Error(`Juego ${gameId} no encontrado`);
 
-            // Switch para el tipo de Game
-            switch (gameData?.source) {
-                case GameSource.MANUAL:
-                    // Lanzamos el juego y pasamos un callback para actualizar el playtime al salir
-
-                    const config = await getLaunchConfig(gameId) as LaunchConfig;
-
-                    if (!config) {
-                        throw new Error(`No launch configuration found for game ${gameId}`);
-                    }
-
-                    await launchManualGame(config, gameId, async (durationMinutes) => {
-                        if (durationMinutes > 0) {
-                            await updatePlaytime(gameId, durationMinutes);
-                        }
-                    });
-                    break;
-                case GameSource.ROM:
-                    // Aquí lanzaríamos el juego ROM usando su configuración específica
-                    await launchEmulator(gameData, async (durationMinutes) => {
-                        if (durationMinutes > 0) {
-                            await updatePlaytime(gameId, durationMinutes);
-                        }
-                    });
+            let pid: number;
+            if (game.source === GameSource.ROM) {
+                pid = await launchEmulator(game as RomGame, async (minutes) => {
+                    await updatePlaytime(gameId, minutes);
+                });
+            } else {
+                const config = (game as ExecutableGame).launchConfig;
+                pid = await launchManualGame(config, gameId, async (minutes) => {
+                    await updatePlaytime(gameId, minutes);
+                });
             }
-
-            return { success: true };
+            return { success: true, pid };
         } catch (error) {
-            console.error(`Error launching game ${gameId}:`, error);
             return { success: false, error: (error as Error).message };
         }
     });
 
-    ipcMain.handle('delete-game-by-id', async (event, gameId: string) => {
+    ipcMain.handle('kill-game', async (_, gameId: string) => {
+        const killed = killGame(gameId);
+        return { success: killed };
+    });
+
+    ipcMain.handle('delete-game-by-id', async (_, gameId: string) => {
         try {
             await deleteGame(gameId);
             return { success: true };

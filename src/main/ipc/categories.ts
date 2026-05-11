@@ -9,10 +9,10 @@ export function registerCategoriesHandlers() {
 
     ipcMain.handle('add-game-category', async (_, payload) => {
         // payload: { name: string, imageBuffer: Uint8Array, imageExt: string }
-        const { name, imageBuffer, imageExt } = payload;
-
+        const { categoryName, imageBuffer, imageExt } = payload;
+        console.log("AddCategory Paylod", payload)
         try {
-            await addCategory(name, imageBuffer, imageExt);
+            await addCategory(categoryName, imageBuffer, imageExt);
             return { success: true };
         } catch (error) {
             return { success: false, error: (error as Error).message };

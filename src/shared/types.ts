@@ -1,9 +1,12 @@
-import { GameSource } from "./enums";
+import { GameCompletionStatus, GameSource, SteamGridImageType } from "./enums";
 
 export interface AppSettings {
-  launchInFullscreen: boolean;  // si debe abrir en modo fullscreen al iniciar
+  launchInFullscreen: boolean;
   defaultWinePrefix?: string;
-  // ... otras opciones globales
+  steamGridDB: {
+    enabled: boolean;
+    apiKey?: string;
+  };
 }
 
 
@@ -22,12 +25,15 @@ export interface LaunchConfig {
   environment?: Record<string, string>;
 }
 
-export interface GameImages {
-  grid: string; // ruta relativa al grid
-  cover: string; // ruta relativa a la portada
-  banner: string; // ruta relativa al banner
-  background: string; // ruta relativa al fondo
+export interface GameImages { // Save relative paths
+  grid?: string;
+  hero?: string;
+  logo?: string;
+  icon?: string;
+  wideGrid?: string;
 }
+
+
 
 export interface GameCategory {
   id: string;
@@ -55,7 +61,7 @@ export interface ScanConfig {
 export interface BaseGame {
   id: string;
   title: string;
-  source: GameSource;           // <- discriminador
+  source: GameSource;
   description?: string;
   developers?: string[];
   publishers?: string[];
@@ -68,6 +74,7 @@ export interface BaseGame {
   lastPlayedAt?: Date;
   addedAt: Date;
   categories?: string[];        // IDs de categorías
+  completionStatus: GameCompletionStatus
 }
 
 // Juegos que se lanzan con un ejecutable (manual, Steam, GOG, etc.)
@@ -84,14 +91,14 @@ export interface RomGame extends BaseGame {
     romPath: string;
     emulatorPath: string;
     launchArguments: string;   // plantilla con {romPath}
-  };  
+  };
 }
 
 // Tipo unión: cualquiera de las variantes
 export type Game = ExecutableGame | RomGame;
 
 // Para resúmenes en el frontend (solo campos necesarios en la cuadrícula)
-export type GameSummary = Pick<Game, 
+export type GameSummary = Pick<Game,
   'id' | 'title' | 'source' | 'gameImages' | 'isInstalled' | 'playtimeMinutes' | 'lastPlayedAt' | 'addedAt'
 > & {
   developer?: string;  // primer desarrollador para mostrar
@@ -112,3 +119,4 @@ export function toGameSummary(game: Game): GameSummary {
     releaseYear: game.releaseYear,
   };
 }
+

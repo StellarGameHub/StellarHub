@@ -1,48 +1,44 @@
 :root {
-  /*COLORS*/
+  /* COLORS */
   --bg-color: #0b0e14;
   --text-color: #cfd8e6;
   --text-muted: #8b98ad;
   --text-accent: #1b1b1b;
 
-  /* PRIMARY */
-  /* Dorado principal de Stellar */
+  /* PRIMARY - Main Stellar gold */
   --primary: #f4c542;
   --primary-hover: #ffd35c;
 
-  /* SECONDARY */
-  /* Azul / acento */
-  --secondary: #42A2F5;
-  --secondary-hover: #76bbff;
+  /* SECONDARY - Neutral, subdued color for standard UI interactions */
+  --secondary: #25334b;
+  --secondary-hover: #324463;
 
-  /* TERTIARY */
-  /* Azul-violeta suave para detalles */
-  --tertiary: #5342F5;
-  --tertiary-hover: #5D5A75;
+  /* TERTIARY - Bright accent for toggles or active navigation items */
+  --tertiary: #42A2F5;
+  --tertiary-hover: #76bbff;
 
   --surface: #111826;
   --surface-hover: #182132;
 
   --surface-elevated: #25334b;
-  --surface-elevated-hover: #202b3d;
+  --surface-elevated-hover: #2c3c57;
 
   --border-color: #263041;
 
-
-  /*SUCCESS*/
+  /* SUCCESS */
   --success: #2ea86b;
   --success-hover: #3bc17e;
   --success-bg: rgba(46, 168, 107, 0.12);
-  /*ERROR*/
+  /* ERROR */
   --error: #c55a5a;
   --error-hover: #d97373;
   --error-bg: rgba(197, 90, 90, 0.12);
-  /*WARNING*/
+  /* WARNING */
   --warning: #e09d32;
   --warning-hover: #f0b14b;
   --warning-bg: rgba(224, 157, 50, 0.12);
 
-  /*END COLORS*/
+  /* END COLORS */
 
   --border-radius: 12px;
   --padding: 0.65rem;
@@ -51,7 +47,6 @@
   --margin: 0.5rem;
 
   --transparency: 15%;
-
 
   --shadow-sm: 0 2px 8px rgb(0 0 0 / 0.2), inset 0 1px 0 rgb(255 255 255 / 0.02);
   --shadow-md: 0 8px 24px rgb(0 0 0 / 0.3), inset 0 1px 0 rgb(255 255 255 / 0.03);
@@ -63,8 +58,6 @@
     radial-gradient(circle at 20% 0%, rgb(255 255 255 / 0.04), transparent 70%),
     var(--surface);
 }
-
-
 
 @font-face {
   font-family: 'Inter';
@@ -81,7 +74,7 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   background: var(--bg-color);
   color: var(--text-color);
   padding: 0;
@@ -89,28 +82,30 @@ body {
   width: 100vw !important;
 }
 
+/* === LINKS SECTION === */
+a {
+  color: var(--primary);
+}
 
-/* === SECCION BOTONES === */
+/* === BUTTON SECTION === */
 
 .btn {
   padding: 0.5rem 1rem;
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.9rem;
-  font-weight: bold;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
 }
 
 .btn-sm {
-  transform: scale(85%);
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
 }
 
 .btn:active {
-  transform: scale(0.98);
+  transform: scale(0.96);
   transition: transform 0.05s;
-}
-
-.btn:hover {
-  box-shadow: 0 0 12px color-mix(in srgb, color percentage, color percentage) rgb(244 197 66 / 0.25);
 }
 
 /* === BTN PRIMARY === */
@@ -121,21 +116,38 @@ body {
   border: 1px solid var(--border-color);
 }
 
+
 .btn-primary:hover {
   background: var(--primary-hover);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--primary) 35%, transparent)
 }
 
 /* === BTN SECONDARY === */
 
 .btn-secondary {
-  background: var(--surface-elevated);
+  background: var(--secondary);
   color: var(--text-color);
   border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover {
-  background: var(--surface-elevated-hover);
+  background: var(--secondary-hover);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--secondary) 35%, transparent)
 }
+
+/* === BTN TERTIARY === */
+
+.btn-tertiary {
+  background: var(--tertiary);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.btn-tertiary:hover {
+  background: var(--tertiary-hover);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--tertiary) 35%, transparent)
+}
+
 
 /* === BTN DANGER === */
 
@@ -147,8 +159,8 @@ body {
 
 .btn-danger:hover {
   background: var(--error-hover);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--error) 35%, transparent)
 }
-
 
 /* === UL LISTS === */
 
@@ -163,22 +175,47 @@ li {
   vertical-align: middle;
   align-items: center;
   gap: var(--gap);
+
 }
 
+/* === DROPDOWN === */
 
-/* === MODERN SLECT === */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  background-color: var(--surface);
+  min-width: 160px;
+  z-index: 1;
+  right: 0;
+  gap: var(--gap);
+  padding: var(--padding);
+}
+
+.dropdown-content.open {
+  display: flex;
+}
+
+/* === MODERN SELECT === */
 
 select {
   appearance: base-select;
+  /* Ensure your Electron version supports this */
 }
 
 ::picker(select) {
   appearance: base-select;
   background-color: var(--surface-elevated);
   color: var(--text-color);
-  padding: 0.5rem 0.5rem;
+  padding: 0.5rem;
   border-radius: var(--border-radius);
-  border-color: var(--secondary);
+  border: 1px solid var(--border-color);
+  /* Changed to neutral border */
 }
 
 select::picker-icon {
@@ -197,19 +234,15 @@ select option {
 
 select option:checked {
   background-color: var(--tertiary);
-
   border: var(--surface-border);
 }
 
+/* === LAYOUT === */
 
-
-/* Div Principal de la app */
 .div-app {
   height: 100% !important;
   width: 100% !important;
 }
-
-/* Contenedor Principal del Layout */
 
 .main-container {
   display: flex;
@@ -218,26 +251,78 @@ select option:checked {
   gap: var(--gap);
   height: 100% !important;
   width: 100% !important;
+  background-color: var(--bg-color);
 }
 
 
-/* Customized WebKit scrollbar */
-/*TODO:*/
-/*AJUSTAR PARA USAR VARIABLES ETC.*/
+/* === SCROLLBAR === */
+
 ::-webkit-scrollbar {
-  width: 12px;
-  height: 12px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--surface);
+  background: var(--bg-color);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--secondary);
+  background: var(--surface-elevated);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--secondary-hover);
+  background: var(--text-muted);
+}
+
+/* === HELPERS === */
+
+.hidden {
+  opacity: 0;
+}
+
+.display-none {
+  display: none !important;
+}
+
+
+.spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 4px solid var(--secondary);
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem auto;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* === SPACER, To Fill Space, duh === */
+.spacer {
+  flex: 1;
+  flex-grow: 1;
+}
+
+/* === PREVENT IMAGE DRAG === */
+/* Prevents selecting the image as if it were text */
+img {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-select: none;
+}
+/*Hidde images with no src*/
+img[src=""] {
+  visibility: hidden;
 }

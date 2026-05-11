@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { Game, ExecutableGame, LaunchConfig } from '../../shared/types';
 import { GameSource } from '../../shared/enums';
+import { deleteGameImages } from './imageService';
 
 // --- Helpers de Rutas ---
 function getGamesFilePath(): string {
@@ -57,6 +58,7 @@ export async function deleteGame(gameID: string) {
     if (gameIndex === -1) {
         console.warn(`attempt to delete non-existent game, with ID: ${gameID}`)
     } else {
+        await deleteGameImages(gameID);
         games.splice(gameIndex, 1);
         await saveGames(games);
     }
@@ -72,14 +74,21 @@ export async function updatePlaytime(gameID: string, additionalMinutes: number):
 }
 
 /**
- * Obtiene únicamente la configuración de lanzamiento de un juego.
- * @param gameId ID del juego
- * @returns La configuración de lanzamiento o undefined si el juego no existe
+ * Get only the Game LaunchConfig
+ * @param gameId Game ID
+ * @returns LaunchConfig or undefined if game does not exists
  */
 export async function getLaunchConfig(gameId: string): Promise<LaunchConfig | undefined> {
     const game = await getGameData(gameId);
-    
+
     if (game?.source == GameSource.MANUAL || game?.source == GameSource.STEAM || game?.source == GameSource.GOG) {
         return (game as ExecutableGame).launchConfig;
-    }    
+    }
+}
+
+export async function getGameIdsByCategory(categoryIds: string[]): Promise<string[]> {
+    const games = await getGames();
+    return games
+        .filter(game => game.categories?.some(catId => categoryIds.includes(catId)))
+        .map(game => game.id);
 }
