@@ -1,9 +1,7 @@
 <div class="game-details-panel hidden" id="game-details-panel">
     <div class="gdp-hero-conatiner">
-        <img id="gdp-hero-image" class="gdp-hero"
-            src="">
-        <img id="gdp-logo-image" class="gdp-logo"
-            src="">
+        <img id="gdp-hero-image" class="gdp-hero" src="">
+        <img id="gdp-logo-image" class="gdp-logo" src="">
         <span id="span-category" class="gdp-span-category">
 
         </span>
@@ -32,15 +30,14 @@
 
         <div class="spacer"></div>
 
-        <div id="gdp-config-menu" class="dropdown gdp-config-button">
-            <button class="btn btn-secondary" id="btn-gdp-menu">
-                <i class="bi bi-gear-fill"></i>
-            </button>
 
-            <div class="gdp-config-menu dropdown-content">
-                <button class="btn btn-secondary w-100">Editar</button>
-                <button id="btn-gdp-delete" class="btn btn-danger w-100">Eliminar</button>
-            </div>
+        <button class="btn btn-secondary dropdown-button" id="btn-gdp-menu" popovertarget="gdp-dropdown-menu">
+            <i class="bi bi-gear-fill"></i>
+        </button>
+
+        <div id="gdp-dropdown-menu" class="dropdown-menu" popover="auto">
+            <button class="btn btn-secondary w-100">Editar</button>
+            <button id="btn-gdp-delete" class="btn btn-danger w-100">Eliminar</button>
         </div>
 
 

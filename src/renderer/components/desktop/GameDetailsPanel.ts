@@ -91,13 +91,15 @@ export class GameDetailsPanel extends HTMLElement {
 
         // CONFIG MENU DROPDOWN
 
-        const menuButton = this.querySelector("#btn-gdp-menu") as HTMLButtonElement;
-        menuButton?.addEventListener("click", (e) => {
-            e.stopPropagation();
+        //NOW IS USING HTML POPOVER, 
 
-            const dropdownElement = menuButton.closest('.dropdown')
-            if (dropdownElement) dropdownElement.querySelector(".dropdown-content")?.classList.toggle('open');
-        });
+        // const menuButton = this.querySelector("#btn-gdp-menu") as HTMLButtonElement;
+        // menuButton?.addEventListener("click", (e) => {
+        //     e.stopPropagation();
+
+        //     const dropdownElement = menuButton.closest('.dropdown')
+        //     if (dropdownElement) dropdownElement.querySelector(".dropdown-content")?.classList.toggle('open');
+        // });
     }
 
     private render() {
