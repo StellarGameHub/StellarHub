@@ -9,3 +9,7 @@ export enum SteamGridImageType {
 export enum GameCompletionStatus {
   PLAYED, PENDING, COMPLETED, ABANDONED
 }
+
+export enum GameCardStyle {
+  PORTRAIT, WIDE, LIST
+}

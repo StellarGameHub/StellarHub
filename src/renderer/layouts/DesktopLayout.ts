@@ -22,13 +22,14 @@ import '../styles/components/desktop-menu.css'
 import '../styles/components/game-details-panel.css'
 import { AppSettingsModal } from '../components/desktop/modals/AppSettingsModal';
 import { GameDetailsPanel } from '../components/desktop/GameDetailsPanel';
+import { GameCardStyle } from '../../shared/enums';
 
 
 export function renderDesktopLayout(games: GameSummary[]): DocumentFragment {
 
 
     //To save the cards
-    const gameCards: HTMLElement[] = [];
+    const gameCards: GameCard[] = [];
 
     const template = document.createElement('template');
     template.innerHTML = desktopLayoutHTML;
@@ -42,13 +43,20 @@ export function renderDesktopLayout(games: GameSummary[]): DocumentFragment {
     games.forEach(game => {
 
         const card = document.createElement('game-card') as GameCard;
-
-        card.game = game;
+        card.setStyle(GameCardStyle.PORTRAIT)
+        card.setGame(game); // Esto llama a RENDER        
 
         grid.appendChild(card);
         gameCards.push(card);
     });
 
+    //PRUEBA DE CAMBIAR LOS ESTILOS EN TIEMPO DE EJECUCION:
+    
+    // const timer: ReturnType<typeof setTimeout> = setTimeout(() => {
+    //     for (const gameCard of gameCards) {
+    //         gameCard.setStyle(GameCardStyle.WIDE);
+    //     }
+    // }, 5000);
 
     //ESCUCHAR EVENTOS DE LOS COMPONENTES
     const menu = content.querySelector('desktop-menu');
