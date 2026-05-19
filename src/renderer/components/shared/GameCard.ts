@@ -122,7 +122,7 @@ export class GameCard extends HTMLElement {
 
         this.dataset.eventsBound = 'true';
 
-        const playBtn = document.querySelector('.play-button');
+        const playBtn = this.querySelector('.play-button');
 
         playBtn?.addEventListener('click', async (e) => {
 
@@ -140,7 +140,7 @@ export class GameCard extends HTMLElement {
             }
         });
 
-        const installBtn = document.querySelector('.install-button');
+        const installBtn = this.querySelector('.install-button');
         installBtn?.addEventListener("click", async (e) => {
             e.stopPropagation();
 
