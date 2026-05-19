@@ -124,7 +124,7 @@ export class GameCard extends HTMLElement {
 
         const playBtn = document.querySelector('.play-button');
 
-        playBtn?.addEventListener('click', (e) => {
+        playBtn?.addEventListener('click', async (e) => {
 
             e.stopPropagation();
 
@@ -134,9 +134,9 @@ export class GameCard extends HTMLElement {
                 gameSession.isGameRunning(this.gameId);
 
             if (running) {
-                this.stopGame();
+                await this.stopGame();
             } else {
-                this.launchGame();
+                await this.launchGame();
             }
         });
 
@@ -174,7 +174,7 @@ export class GameCard extends HTMLElement {
     private onGameStopped(gameId: string) {
 
         if (gameId === this.gameId) {
-            this.updatePlayButton(true);
+            this.updatePlayButton(true); // Le ponemos true porque si se esta deteniendo es que esta instalado
         }
     }
 
