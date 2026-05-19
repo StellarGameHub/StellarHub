@@ -11,6 +11,20 @@ const defaultSettings: AppSettings = {
     apiKey: undefined,
     enabled: false
   },
+  steam: {
+    enabled: false,
+    clientId: undefined,
+    apiKey: undefined
+  },
+
+  // rawg: {
+  //   enabled: false,
+  //   apiKey: undefined
+  // },
+  // igdb: {
+  //   enabled: false,
+  //   apiKey: undefined,
+  // },
   defaultWinePrefix: undefined,
 };
 

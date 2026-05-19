@@ -1,13 +1,15 @@
 import { GameSummary } from '../../../shared/types';
 import gameCardHtml from '../../templates/game-card.html?raw';
 import { gameSession } from '../../services/gameSessionService';
-import { GameCardStyle } from '../../../shared/enums';
+import { GameCardStyle, GameSource } from '../../../shared/enums';
 
 export class GameCard extends HTMLElement {
 
     private gameId: string = '';
     private gameData: GameSummary | null = null;
     private gameCardStyle: GameCardStyle = GameCardStyle.PORTRAIT;
+
+    private filters: string[] = [];
 
     private boundOnGameStarted: (gameId: string) => void;
     private boundOnGameStopped: (gameId: string) => void;
@@ -59,6 +61,10 @@ export class GameCard extends HTMLElement {
     // Public API
     // =========================
 
+    getFilters() {
+        return this.filters;
+    }
+
     setGame(game: GameSummary) {
 
         this.gameId = game.id;
@@ -95,6 +101,14 @@ export class GameCard extends HTMLElement {
         this.updateCover();
     }
 
+    show() {
+        this.style.display = 'flex';
+    }
+
+    hide() {
+        this.style.display = 'none';
+    }
+
     // =========================
     // Events
     // =========================
@@ -108,11 +122,13 @@ export class GameCard extends HTMLElement {
 
         this.dataset.eventsBound = 'true';
 
-        const playBtn = this.querySelector('.play-button');
+        const playBtn = document.querySelector('.play-button');
 
         playBtn?.addEventListener('click', (e) => {
 
             e.stopPropagation();
+
+            console.log("Play Button Clicked")
 
             const running =
                 gameSession.isGameRunning(this.gameId);
@@ -123,6 +139,13 @@ export class GameCard extends HTMLElement {
                 this.launchGame();
             }
         });
+
+        const installBtn = document.querySelector('.install-button');
+        installBtn?.addEventListener("click", async (e) => {
+            e.stopPropagation();
+
+            const result = await window.electronAPI.invoke("install-game-by-id", this.gameId);
+        })
 
         this.addEventListener('click', (e) => {
 
@@ -144,14 +167,14 @@ export class GameCard extends HTMLElement {
     private onGameStarted(gameId: string) {
 
         if (gameId === this.gameId) {
-            this.updatePlayButton();
+            this.updatePlayButton(true);
         }
     }
 
     private onGameStopped(gameId: string) {
 
         if (gameId === this.gameId) {
-            this.updatePlayButton();
+            this.updatePlayButton(true);
         }
     }
 
@@ -188,6 +211,21 @@ export class GameCard extends HTMLElement {
         this.setAttribute('data-game-id', game.id);
         this.setAttribute('data-game-title', game.title);
 
+        ///GUARDAR FILTROS
+
+        switch (game.source) {
+            case GameSource.MANUAL:
+                this.filters.push("gs-manual");
+                break;
+            case GameSource.STEAM:
+                this.filters.push("gs-steam");
+                break;
+            case GameSource.ROM:
+                this.filters.push("gs-rom");
+                break;
+        }
+
+
         // Title
         const title =
             this.querySelector('.game-title');
@@ -196,26 +234,8 @@ export class GameCard extends HTMLElement {
             title.textContent = game.title;
         }
 
-        // Developer
-        const developer =
-            this.querySelector('.game-developer');
-
-        if (developer) {
-            developer.textContent =
-                game.developer ?? '';
-        }
-
-        // Year
-        const year =
-            this.querySelector('.game-year');
-
-        if (year) {
-            year.textContent =
-                game.releaseYear?.toString() ?? '';
-        }
-
         this.updateCover();
-        this.updatePlayButton();
+        this.updatePlayButton(game.isInstalled);
     }
 
     private updateCover() {
@@ -262,50 +282,58 @@ export class GameCard extends HTMLElement {
         }
     }
 
-    updatePlayButton() {
+    updatePlayButton(isInstalled: boolean) {
 
         const playButton = this.querySelector('.play-button') as HTMLButtonElement;
+        const installButton = this.querySelector('.install-button') as HTMLButtonElement;
 
-        if (!playButton) return;
+        if (!installButton || !playButton) return;
 
-
-        const textSpan =
-            playButton.querySelector('span');
-
-        const icon =
-            playButton.querySelector('i');
-
-        const running =
-            gameSession.isGameRunning(this.gameId);
-
-        if (running) {
-
-            playButton.classList.replace(
-                'btn-primary',
-                'btn-tertiary'
-            );
-
-            if (textSpan) {
-                textSpan.textContent = 'Stop';
-            }
-
-            if (icon) {
-                icon.className = 'bi bi-stop-fill';
-            }
-
+        if (!isInstalled) {
+            installButton.classList.remove('display-none');
+            playButton.classList.add('display-none');
         } else {
+            installButton.classList.add('display-none');
+            playButton.classList.remove('display-none');
 
-            playButton.classList.replace(
-                'btn-tertiary',
-                'btn-primary'
-            );
+            const textSpan =
+                playButton.querySelector('span');
 
-            if (textSpan) {
-                textSpan.textContent = 'Play';
-            }
+            const icon =
+                playButton.querySelector('i');
 
-            if (icon) {
-                icon.className = 'bi bi-play-fill';
+            const running =
+                gameSession.isGameRunning(this.gameId);
+
+            if (running) {
+
+                playButton.classList.replace(
+                    'btn-primary',
+                    'btn-tertiary'
+                );
+
+                if (textSpan) {
+                    textSpan.textContent = 'Stop';
+                }
+
+                if (icon) {
+                    icon.className = 'bi bi-stop-fill';
+                }
+
+            } else {
+
+                playButton.classList.replace(
+                    'btn-tertiary',
+                    'btn-primary'
+                );
+
+                if (textSpan) {
+                    textSpan.textContent = 'Play';
+                }
+
+                if (icon) {
+                    icon.className = 'bi bi-play-fill';
+                }
             }
         }
     }

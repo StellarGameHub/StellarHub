@@ -6,7 +6,21 @@ export interface AppSettings {
   steamGridDB: {
     enabled: boolean;
     apiKey?: string;
+
   };
+  steam: {
+    enabled: boolean;
+    apiKey?: string;
+    clientId?: string;
+  }
+  // rawg: {
+  //   enabled: boolean;
+  //   apiKey?: string;
+  // }
+  // igdb: {
+  //   enabled: boolean;
+  //   apiKey?: { clientId: string; clientSecret: string; };
+  // }
 }
 
 
@@ -65,7 +79,7 @@ export interface BaseGame {
   description?: string;
   developers?: string[];
   publishers?: string[];
-  releaseYear?: number;
+  releaseDate?: Date;
   genres?: string[];
   gameImages: GameImages;
   isInstalled: boolean;
@@ -93,16 +107,22 @@ export interface RomGame extends BaseGame {
     launchArguments: string;   // plantilla con {romPath}
   };
 }
+//Juego de Steam
+export interface SteamGame extends BaseGame {
+  installPath: string;
+  source: GameSource.STEAM;
+  steamAppId: number;
+}
 
 // Tipo unión: cualquiera de las variantes
-export type Game = ExecutableGame | RomGame;
+export type Game = ExecutableGame | RomGame | SteamGame;
 
 // Para resúmenes en el frontend (solo campos necesarios en la cuadrícula)
 export type GameSummary = Pick<Game,
-  'id' | 'title' | 'source' | 'gameImages' | 'isInstalled' | 'playtimeMinutes' | 'lastPlayedAt' | 'addedAt'
+  'id' | 'title' | 'source' | 'gameImages' | 'isInstalled' | 'playtimeMinutes' | 'lastPlayedAt' | 'addedAt' | 'categories'
 > & {
   developer?: string;  // primer desarrollador para mostrar
-  releaseYear?: number;
+  releaseDate?: Date;
 };
 
 export function toGameSummary(game: Game): GameSummary {
@@ -116,7 +136,7 @@ export function toGameSummary(game: Game): GameSummary {
     lastPlayedAt: game.lastPlayedAt,
     addedAt: game.addedAt,
     developer: game.developers?.[0],
-    releaseYear: game.releaseYear,
+    releaseDate: game.releaseDate,
   };
 }
 

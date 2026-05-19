@@ -7,14 +7,16 @@ import { registerImageHandlers } from './ipc/images';
 import path from 'path';
 import { registerCategoriesHandlers } from './ipc/categories';
 import { registerDialogHandlers } from './ipc/dialogs';
-import { registerScanHandlers } from './ipc/scan';
+import { registerRomScanHandlers } from './ipc/roms';
+import { registerSteamHandlers } from './ipc/steam';
+import { runAutoScans } from './services/autoScanService';
 
 
 function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
-     frame:false,
+    frame: false,
     webPreferences: {
       preload: path.join(__dirname, '../preload/preload.js'),
       contextIsolation: true,
@@ -47,14 +49,20 @@ app.whenReady().then(() => {
     return net.fetch('file://' + filePath);
   });
 
-  registerScanHandlers();
+  registerSteamHandlers();
+  registerRomScanHandlers();
   registerDialogHandlers();
   registerCategoriesHandlers();
   registerSettingsHandlers();
   registerGameHandlers();
   registerProtonHandlers();
   registerImageHandlers();
+
+  //MOSTRAR LA VENTANA
   createWindow();
+
+  //AUTOSCAN DE JUEGOS
+  runAutoScans().catch(err => console.error('AutoScan error:', err));
 });
 
 app.on('window-all-closed', () => {

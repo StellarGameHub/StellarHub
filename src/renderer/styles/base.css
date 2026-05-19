@@ -7,35 +7,36 @@
 
   /* PRIMARY - Main Stellar gold */
   --primary: #f4c542;
-  --primary-hover: #ffd35c;
+  --primary-hover: oklch(from var(--primary) calc(l + 0.1) c h);
+
 
   /* SECONDARY - Neutral, subdued color for standard UI interactions */
   --secondary: #25334b;
-  --secondary-hover: #324463;
+  --secondary-hover: oklch(from var(--secondary) calc(l + 0.1) c h);
 
   /* TERTIARY - Bright accent for toggles or active navigation items */
   --tertiary: #42A2F5;
-  --tertiary-hover: #76bbff;
+  --tertiary-hover: oklch(from var(--tertiary) calc(l + 0.1) c h);
 
-  --surface: #111826;
-  --surface-hover: #182132;
+  --surface: #03060d;
+  --surface-hover: oklch(from var(--surface) calc(l + 0.1) c h);
 
-  --surface-elevated: #25334b;
-  --surface-elevated-hover: #2c3c57;
+  --surface-elevated: oklch(from var(--surface) calc(l + 0.05) calc(c - 0.01) h);
+  --surface-elevated-hover: oklch(from var(--surface-elevated) calc(l + 0.1) c h);
 
   --border-color: #263041;
 
   /* SUCCESS */
   --success: #2ea86b;
-  --success-hover: #3bc17e;
+  --success-hover: oklch(from var(--success) calc(l + 0.1) c h);
   --success-bg: rgba(46, 168, 107, 0.12);
   /* ERROR */
   --error: #c55a5a;
-  --error-hover: #d97373;
+  --error-hover: oklch(from var(--error) calc(l + 0.1) c h);
   --error-bg: rgba(197, 90, 90, 0.12);
   /* WARNING */
   --warning: #e09d32;
-  --warning-hover: #f0b14b;
+  --warning-hover: oklch(from var(--warning) calc(l + 0.1) c h);
   --warning-bg: rgba(224, 157, 50, 0.12);
 
   /* END COLORS */
@@ -182,7 +183,10 @@ li {
 
 .dropdown-button {
   anchor-name: --dropdown-button;
+<<<<<<< HEAD
   ;
+=======
+>>>>>>> 5bcb215 (Multiple Improvements)
 }
 
 .dropdown-menu {
@@ -193,20 +197,84 @@ li {
   border-radius: var(--border-radius);
   min-width: 160px;
   z-index: 1;
-  right: 0;
   gap: var(--gap);
   padding: var(--padding);
   position: absolute;
   position-anchor: dropdown-button;
+<<<<<<< HEAD
   position-area: bottom right;
   margin: initial;
 }
 
 .dropdown-menu:popover-open {
+=======
+  position-area: bottom span-right;
+  margin: initial;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.dropdown-menu:popover-open {
+  display: flex;
+  margin: 0.3rem 0;
+  position: relative;
+
+}
+
+/* === HOVER MENU === */
+.hover-menu {
+  display: flex;
+  flex-direction: column;
+  anchor-name: --hover-menu;
+  overflow: hidden;
+}
+
+.hover-menu>span {
+  text-align: center;
+  border-radius: var(--border-radius);
+  background-color: var(--primary);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  color: var(--text-accent);
+  border: 1px solid var(--border-color);
+  width: 100%;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.hover-menu>div {
+  position-anchor: --hover-menu;
+  display: none;
+  position: fixed;
+  padding: var(--padding);
+  gap: var(--gap);
+  position-area: right span-bottom;
+  background-color: var(--surface-elevated);
+  flex-direction: column;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+
+}
+
+.hover-menu:hover>div {
+>>>>>>> 5bcb215 (Multiple Improvements)
   display: flex;
   margin: initial;
 }
 
+<<<<<<< HEAD
+=======
+.checkbox {
+  display: flex;
+  color: var(--text-color);
+  justify-content: space-between;
+  gap: var(--gap);
+}
+.checkbox>input {
+  width: 16px;
+}
+
+>>>>>>> 5bcb215 (Multiple Improvements)
 
 
 /* === MODERN SELECT === */
@@ -256,7 +324,6 @@ select option:checked {
   display: flex;
   flex-wrap: nowrap;
   flex-direction: column;
-  gap: var(--gap);
   height: 100% !important;
   width: 100% !important;
   background-color: var(--bg-color);
@@ -283,6 +350,10 @@ select option:checked {
   background: var(--text-muted);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* === HELPERS === */
 
 .hidden {
@@ -295,13 +366,27 @@ select option:checked {
 
 
 .spinner {
-  border: 4px solid rgba(255, 255, 255, 0.3);
+  border: 4px solid var(--primary);
   border-radius: 50%;
   border-top: 4px solid var(--secondary);
   width: 40px;
   height: 40px;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem auto;
+}
+
+.spinner-sm {
+  border: 4px solid var(--primary);
+  border-top: 4px solid var(--secondary);
+  border-radius: 50%;
+
+  width: 20px;
+  height: 20px;
+
+  animation: spin 1s linear infinite;
+
+  margin: 0;
+  flex-shrink: 0;
 }
 
 @keyframes spin {

@@ -10,6 +10,7 @@ import '../components/desktop/modals/AddGameModal';
 import '../components/desktop/modals/AppSettingsModal';
 import '../components/desktop/GameDetailsPanel';
 import '../components/desktop/DesktopMenu';
+import '../components/desktop/TaskToast'
 import '../components/shared/GameCard'
 
 import '../utils/uiHelpers'
@@ -22,20 +23,33 @@ import '../styles/components/desktop-menu.css'
 import '../styles/components/game-details-panel.css'
 import { AppSettingsModal } from '../components/desktop/modals/AppSettingsModal';
 import { GameDetailsPanel } from '../components/desktop/GameDetailsPanel';
+<<<<<<< HEAD
 import { GameCardStyle } from '../../shared/enums';
+=======
+import { DesktopViewType, GameCardStyle } from '../../shared/enums';
+>>>>>>> 5bcb215 (Multiple Improvements)
+
+//To save the cards
+const gameCards: GameCard[] = [];
+let currentSelectedId: string | undefined = undefined;
+let currentSelectedView: DesktopViewType | undefined = undefined;
+let desktopLayout: DocumentFragment | undefined = undefined;
+
+export async function renderDesktopLayout(games: GameSummary[]): Promise<DocumentFragment> {
 
 
-export function renderDesktopLayout(games: GameSummary[]): DocumentFragment {
-
-
+<<<<<<< HEAD
     //To save the cards
     const gameCards: GameCard[] = [];
 
+=======
+>>>>>>> 5bcb215 (Multiple Improvements)
     const template = document.createElement('template');
     template.innerHTML = desktopLayoutHTML;
 
-    const content = template.content;
+    desktopLayout = template.content;
 
+<<<<<<< HEAD
     console.log("Contenido del DesktopLaytour", content)
 
     const grid = content.querySelector('#ds-grid') as HTMLElement;
@@ -49,6 +63,9 @@ export function renderDesktopLayout(games: GameSummary[]): DocumentFragment {
         grid.appendChild(card);
         gameCards.push(card);
     });
+=======
+    await updateGames();
+>>>>>>> 5bcb215 (Multiple Improvements)
 
     //PRUEBA DE CAMBIAR LOS ESTILOS EN TIEMPO DE EJECUCION:
     
@@ -59,39 +76,39 @@ export function renderDesktopLayout(games: GameSummary[]): DocumentFragment {
     // }, 5000);
 
     //ESCUCHAR EVENTOS DE LOS COMPONENTES
-    const menu = content.querySelector('desktop-menu');
+    const menu = desktopLayout.querySelector('desktop-menu');
     if (menu) {
 
         // MODALs
 
-        const addCategoryModal = content.querySelector('modal-add-category') as AddCategoryModal;
+        const addCategoryModal = desktopLayout.querySelector('modal-add-category') as AddCategoryModal;
 
         menu.addEventListener('open-add-category-modal', () => {
-            console.log("Esuchando a OpenAddCategoryModal");
             addCategoryModal.open();
         });
 
-        const addGameModal = content.querySelector('modal-add-game') as AddGameModal;
+        const addGameModal = desktopLayout.querySelector('modal-add-game') as AddGameModal;
 
         menu.addEventListener('open-add-game-modal', () => {
             addGameModal.open();
         });
 
-        const scanManagerModal = content.querySelector('modal-scan-manager') as ScanManagerModal
+        const scanManagerModal = desktopLayout.querySelector('modal-scan-manager') as ScanManagerModal
         menu.addEventListener('open-scan-manager-modal', () => {
             scanManagerModal.open();
         });
 
-        const appSettingsModal = content.querySelector('modal-app-settings') as AppSettingsModal
+        const appSettingsModal = desktopLayout.querySelector('modal-app-settings') as AppSettingsModal
         menu.addEventListener('open-app-settings-modal', () => {
             appSettingsModal.open();
         });
 
-        const gameDetailsPanel = content.querySelector("game-details-panel") as GameDetailsPanel
+        const gameDetailsPanel = desktopLayout.querySelector("game-details-panel") as GameDetailsPanel
         window.addEventListener('game-card-selected', (e) => {
 
             const event = e as CustomEvent;
-            gameDetailsPanel.gameID = event.detail.gameID;
+            currentSelectedId = event.detail.gameID;
+            gameDetailsPanel.gameId = event.detail.gameID;
 
             for (let gameCard of gameCards) {
                 gameCard.classList.remove("selected");
@@ -100,8 +117,104 @@ export function renderDesktopLayout(games: GameSummary[]): DocumentFragment {
             (event.detail.gameCard as HTMLElement)?.classList.add("selected")
 
         });
+
+        ///CAMBBIAR EL LAYOUT DEL MENU
+        ///DEBERIAMOS RECORDAR LA OPCION ELEGIDA POR EL USUARIO
+        menu.addEventListener('toggle-view', (e) => {
+            const event = e as CustomEvent;
+            let type: DesktopViewType = event.detail;
+            currentSelectedView = type;
+            changeViewType(type);
+        })
+
+        ///CAMBIO DE FILTROS
+        menu.addEventListener('filter-games', async (e) => {
+            const event = e as CustomEvent;
+            await filterGames(event.detail);
+        })
+
+
+        // Escuchar evento de actualización de juegos para re-renderizar
+        menu.addEventListener('games-updated', async () => {
+            await updateGames();
+        });
     }
 
-    return content;
-
+    return desktopLayout;
 }
+
+function filterGames(checkBoxes: HTMLInputElement[]) {
+    let activeFilters: string[] = [];
+
+    checkBoxes.forEach(cb => {
+        if (cb.checked) {
+            let filter = cb.value;
+            if (filter) activeFilters.push(filter);
+        }
+    });
+    for (const gameCard of gameCards) {
+        if (gameCard.getFilters().some(filter => activeFilters.includes(filter))) {
+            gameCard.show();
+        } else {
+            gameCard.hide();
+        }
+    }
+}
+
+function changeViewType(type: DesktopViewType) {
+    switch (type) {
+        case DesktopViewType.WIDE:
+            localStorage.setItem("desktop-view-type", "wide");
+            for (const card of gameCards) {
+                card.setStyle(GameCardStyle.WIDE);
+            }
+            break;
+        case DesktopViewType.GRID:
+            localStorage.setItem("desktop-view-type", "grid");
+            for (const card of gameCards) {
+                card.setStyle(GameCardStyle.PORTRAIT);
+            }
+            break;
+        case DesktopViewType.LIST:
+            localStorage.setItem("desktop-view-type", "list");
+            for (const card of gameCards) {
+                card.setStyle(GameCardStyle.LIST);
+            }
+            break;
+    }
+}
+
+async function updateGames() {
+    const grid = desktopLayout?.querySelector('#ds-grid') as HTMLElement;
+
+    grid.innerHTML = "";
+
+    const games = await window.electronAPI.invoke('get-games-summary') as GameSummary[];
+    let cardStyle = GameCardStyle.PORTRAIT;
+
+    switch (localStorage.getItem("desktop-view-type")) {
+        case "wide":
+            cardStyle = GameCardStyle.WIDE;
+            break;
+        case "list":
+            cardStyle = GameCardStyle.LIST;
+            break;
+    }
+
+    games.forEach(game => {
+
+        const card = document.createElement('game-card') as GameCard;
+
+        card.setStyle(cardStyle)
+        card.setGame(game);
+
+        grid.appendChild(card);
+        gameCards.push(card);
+    });
+
+    if (currentSelectedId) {
+        let selectedGameCard = desktopLayout?.querySelector(`game-card[data-game-id="${currentSelectedId}"]`) as HTMLElement;
+        if (selectedGameCard) selectedGameCard.click();
+    }
+}
+

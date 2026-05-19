@@ -1,3 +1,4 @@
+import { DesktopViewType } from '../../../shared/enums';
 import desktopMenuHTML from '../../templates/desktop-menu.html?raw';
 
 export class DesktopMenu extends HTMLElement {
@@ -72,6 +73,52 @@ export class DesktopMenu extends HTMLElement {
         document.getElementById('close-app-btn')?.addEventListener('click', () => {
             window.electronAPI.quitApp();
         });
+        //Switch Views Buttons
+        this.querySelector("#ds-button-view-wide")?.addEventListener('click', () => {
+            this.dispatchEvent(new CustomEvent(
+                'toggle-view',
+                {
+                    bubbles: true,
+                    composed: true,
+                    detail: DesktopViewType.WIDE
+                }
+            ))
+        });
+        this.querySelector("#ds-button-view-grid")?.addEventListener('click', () => {
+            this.dispatchEvent(new CustomEvent(
+                'toggle-view',
+                {
+                    bubbles: true,
+                    composed: true,
+                    detail: DesktopViewType.GRID
+                }
+            ))
+        });
+        this.querySelector("#ds-button-view-list")?.addEventListener('click', () => {
+            this.dispatchEvent(new CustomEvent(
+                'toggle-view',
+                {
+                    bubbles: true,
+                    composed: true,
+                    detail: DesktopViewType.LIST
+                }
+            ))
+        });
+
+        const filterCheckboxes = this.querySelector("#menu-filter")?.querySelectorAll("input[type=checkbox]");
+        filterCheckboxes?.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                this.dispatchEvent(new CustomEvent(
+                    'filter-games',
+                    {
+                        bubbles: true,
+                        composed: true,
+                        detail: filterCheckboxes
+                    }
+                ))
+            });
+        });
+
 
         //SEARCH BAR
         let searchTimer: ReturnType<typeof setTimeout>;

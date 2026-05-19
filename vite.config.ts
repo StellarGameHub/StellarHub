@@ -1,4 +1,6 @@
 import { defineConfig } from 'vite';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import electronRenderer from 'vite-plugin-electron-renderer';
 import path from 'path';
 
 export default defineConfig({
@@ -10,4 +12,12 @@ export default defineConfig({
   server: {
     port: 3000,
   },
+  plugins: [
+    electronRenderer(),
+    nodePolyfills({
+      include: ['crypto'], // polyfill only crypto
+      globals: { Buffer: true, global: true, process: true },
+    }),
+  ]
+
 });

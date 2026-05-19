@@ -16,15 +16,20 @@
                     <label>Game Path:</label>
                     <div class="path-selector">
                         <input type="text" id="executablePath" readonly required>
-                        <button type="button" class="btn btn-secondary" id="btn-browse-game">📂 Examine</button>
+                        <button type="button" class="btn btn-secondary" id="btn-browse-game">
+                            <i class="bi bi-folder-fill"></i>
+                            Examine
+                        </button>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Proton Prefix Folder:</label>
                     <div class="path-selector">
-                        <input type="text" id="winePrefix" placeholder="~/Games/prefixes/my-game" readonly required>
-                        <button type="button" class="btn btn-secondary" id="btn-browse-prefix">📂 Examine</button>
+                        <input type="text" id="wine-prefix" placeholder="~/Games/prefixes/my-game" required>
+                        <button type="button" class="btn btn-secondary" id="btn-browse-prefix">
+                            <i class="bi bi-folder-fill"></i>
+                            Examine</button>
                     </div>
                 </div>
 
@@ -36,12 +41,12 @@
                 </div>
                 <div class="form-group">
                     <label>Launch Arguments:</label>
-                    <input type="text" id="launchArgs" placeholder="--no-esync">
+                    <input type="text" id="launchArgs" placeholder="">
                 </div>
                 <div class="form-group">
 
                     <label>Game Arguments:</label>
-                    <input type="text" id="gameArgs" placeholder="+exec autoexec">
+                    <input type="text" id="gameArgs" placeholder="">
                 </div>
                 <div class="form-group">
                     <label>MangoHud:</label>
@@ -58,18 +63,15 @@
                         <option value="true">Sí</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Imagen Grid (optional):</label>
-                    <input type="file" id="gridImageFile" accept="image/png,image/jpeg,image/jpg,image/webp">
-                </div>
+
                 <div class="form-group">
                     <div class="modal-buttons">
                         <button type="button" class="btn btn-secondary" id="close-modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">
-                            <div class="btn-content">Save</div>         
+                            <div class="btn-content">Save</div>
                             <div class="btn-spinner display-none">
                                 <span class="spinner-sm"></span>
-                            </div>                   
+                            </div>
                         </button>
                     </div>
                 </div>

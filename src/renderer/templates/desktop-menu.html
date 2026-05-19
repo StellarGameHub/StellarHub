@@ -18,10 +18,55 @@
             <input id="ds-search-bar" class="ds-search-bar">
         </div>
 
+        <div class="ds-buttons-container">
+
+            <button class="btn btn-primary" id="ds-button-view" popovertarget="menu-view">
+                <i class="bi bi-columns-gap"></i>
+            </button>
+
+
+            <button class="btn btn-primary" id="ds-button-filter" popovertarget="menu-filter">
+                <i class="bi bi-funnel"></i>
+            </button>
+            <button class="btn btn-primary" id="ds-button-group">
+                <i class="bi bi-collection"></i>
+            </button>
+        </div>
+
+        <div class="dropdown-menu" id="menu-filter" popover="auto">
+
+            <span class="">Source</span>
+            <hr>
+            <div>
+                <div class="checkbox">
+                    <label>Manual</label>
+                    <input type="checkbox" value="gs-manual" checked />
+                </div>
+                <div class="checkbox">
+                    <label>Steam</label>
+                    <input type="checkbox" value="gs-steam" checked />
+                </div>
+                <div class="checkbox">
+                    <label>Rom</label>
+                    <input type="checkbox" value="gs-rom" checked />
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="dropdown-menu" id="menu-view" popover="auto">
+            <button class="btn btn-primary" id="ds-button-view-grid">Grid</button>
+            <button class="btn btn-primary" id="ds-button-view-wide">Wide Grid</button>
+            <button class="btn btn-primary" id="ds-button-view-list">List</button>
+        </div>
+
+        <task-toast></task-toast>
+
         <span class="spacer"></span>
         <button id="close-app-btn" class="btn btn-secondary">
-            <i class="bi bi-x-lg"></i>
-            Close
+            Exit
+            <i class="bi bi"></i>
         </button>
     </div>
     <div id="ds-lateral-menu" class="ds-lateral-menu">

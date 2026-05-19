@@ -2,6 +2,7 @@ import { getSettings } from './settingsService';
 import { getGameData, getGameIdsByCategory, saveGame } from './libraryService';
 import { saveGameImage } from './imageService'; // usaremos la función existente
 import { SteamGridImageType } from '../../shared/enums';
+import { backgroundTask, TaskType } from './backgroundTaskService';
 
 
 //We can import this from 'steamgriddb' cause is no ESM bla bla
@@ -171,6 +172,8 @@ export async function fetchAllGameImages(
         const game = await getGameData(gameId);
         if (!game) throw new Error(`Game ${gameId} not found`);
 
+        const backgroundTaskId = backgroundTask.startTask(`Downloading images for ${game.title}...`, TaskType.DownloadImages);
+
         // Search game on SGDB
         const searchResults = await searchGameOnSteamGridDB(game.title);
         if (!searchResults?.length) {
@@ -180,8 +183,9 @@ export async function fetchAllGameImages(
         const bestMatch = searchResults[0];
         let anySuccess = false;
 
-        // Get best non NSFW (Go to horny jain) image
+        // Get best non NSFW (Go to horny jail) image
         for (const type of imageTypes) {
+            backgroundTask.updateProgress(backgroundTaskId, `Downloading ${SteamGridImageType[type]} for ${game.title}...`)
             const images = await getGameImagesFromSteamGridDB(bestMatch.id, [type]);
             if (!images.length) continue;
             const image = images.find(img => !img.tags?.includes('nsfw')) || images[0];
@@ -215,6 +219,7 @@ export async function fetchAllGameImages(
         }
 
         if (anySuccess) {
+            backgroundTask.completeTask(backgroundTaskId, `Images downloaded for ${game.title}`);
             await saveGame(game);
         }
         return anySuccess;
@@ -239,9 +244,15 @@ export async function fetchImagesForGameList(
     let success = 0;
     let failed = 0;
     const total = gameIds.length;
+
+    const backgroundTaskId = backgroundTask.startTask(`Downloading images for ${total} games...`, TaskType.DownloadImages);
+
     for (let i = 0; i < total; i++) {
         const gameId = gameIds[i];
         const game = await getGameData(gameId);
+
+        backgroundTask.updateProgress(`${total - (i + 1)} images remaining`, ((i * 100) / total).toString());
+
         if (!game) {
             failed++;
             continue;
@@ -251,6 +262,7 @@ export async function fetchImagesForGameList(
         else failed++;
         if (onProgress) onProgress(i + 1, total);
     }
+    backgroundTask.completeTask(backgroundTaskId, `Finished downloading images for ${total} games`);
     return { success, failed };
 }
 

@@ -1,10 +1,9 @@
 import { ipcMain } from 'electron';
-import { GameSource, SteamGridImageType } from '../../shared/enums';
-import { ExecutableGame, Game, LaunchConfig, RomGame } from '../../shared/types';
-import { saveGameImage } from '../services/imageService';
-import { killGame, launchEmulator, launchManualGame } from '../services/gameLauncher';
-import { getGames, getGameData, saveGame, getLaunchConfig, updatePlaytime, deleteGame } from '../services/libraryService';
-import { fetchAllGameImages } from '../services/imageFetcher';
+import { GameSource } from '../../shared/enums';
+import { ExecutableGame, RomGame, SteamGame } from '../../shared/types';
+import { killGame, launchEmulator, launchManualGame, launchSteamGame } from '../services/gameLauncher';
+import { getGames, getGameData, saveGame, updatePlaytime, deleteGame, addManualGame, installGame } from '../services/libraryService';
+
 
 export function registerGameHandlers() {
     ipcMain.handle('get-games-summary', async () => {
@@ -22,42 +21,16 @@ export function registerGameHandlers() {
         return { success: true };
     });
 
-    ipcMain.handle('add-manual-game', async (_, payload) => {
-        console.log('Received add-manual-game with payload:', payload);
+    ipcMain.handle('add-manual-game', async (_, gameData) => {
+        console.log('Received add-manual-game with payload:', gameData);
         try {
-            const { gameData, imageBuffer, imageExt } = payload;
+            var newId = await addManualGame(gameData);
 
-            console.log('Game data:', gameData);
-            console.log('Image buffer length:', imageBuffer ? imageBuffer.byteLength : 'No image');
-            console.log('Image extension:', imageExt);
-
-            const newId = crypto.randomUUID();
-
-            let gridImagePath = '';
-
-            if (imageBuffer && imageExt) {
-                gridImagePath = await saveGameImage(newId, imageBuffer, imageExt, SteamGridImageType.GRID);
-            }
-
-            const newGame: ExecutableGame = {
-                ...gameData,
-                id: newId,
-                addedAt: new Date(),
-                playtimeMinutes: 0,
-                source: GameSource.MANUAL,
-                gameImages: {
-                    grid: gridImagePath,
-                },
-            };
-
-            await saveGame(newGame);
-            await fetchAllGameImages(newGame.id);
             return { success: true, gameId: newId };
         } catch (error) {
             return { success: false, error: (error as Error).message };
         }
     });
-
 
     ipcMain.handle('launch-game-by-id', async (_, gameId: string) => {
         try {
@@ -69,7 +42,12 @@ export function registerGameHandlers() {
                 pid = await launchEmulator(game as RomGame, async (minutes) => {
                     await updatePlaytime(gameId, minutes);
                 });
-            } else {
+            } else if (game.source === GameSource.STEAM) {
+                pid = await launchSteamGame(game as SteamGame, async (minutes) => {
+                    await updatePlaytime(gameId, minutes);
+                })
+            }
+            else {
                 const config = (game as ExecutableGame).launchConfig;
                 pid = await launchManualGame(config, gameId, async (minutes) => {
                     await updatePlaytime(gameId, minutes);
@@ -96,5 +74,15 @@ export function registerGameHandlers() {
         }
     });
 
+    ipcMain.handle('install-game-by-id', async (_, gameId: string) => {
+        try {
+            await installGame(gameId);
+            console.log("InstallGameByID success with gameId:", gameId)
+            return { success: true };
+        } catch (error) {
+            console.error(`Error intalling game ${gameId}:`, error);
+            return { success: false, error: (error as Error).message };
+        }
+    });
 
 }

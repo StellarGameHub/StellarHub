@@ -1,8 +1,7 @@
 import { ipcMain } from 'electron';
-import { getScanConfigs, saveScanConfig, deleteScanConfig, updateScanDate } from '../services/scanConfigService';
-import { runScan } from '../services/romScannerService'; // lo implementaremos luego
+import { runScan, getScanConfigs, saveScanConfig, deleteScanConfig, updateScanDate } from '../services/romScannerService';
 
-export function registerScanHandlers() {
+export function registerRomScanHandlers() {
   ipcMain.handle('get-scan-configs', async () => {
     return await getScanConfigs();
   });

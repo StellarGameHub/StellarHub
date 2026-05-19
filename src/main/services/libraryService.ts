@@ -1,10 +1,14 @@
 // src/main/services/libraryService.ts
-import { app } from 'electron';
+import { app, shell } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
-import { Game, ExecutableGame, LaunchConfig } from '../../shared/types';
-import { GameSource } from '../../shared/enums';
+import { Game, ExecutableGame, LaunchConfig, GameSummary, SteamGame } from '../../shared/types';
+import { GameCompletionStatus, GameSource } from '../../shared/enums';
 import { deleteGameImages } from './imageService';
+import { fetchAllGameImages } from '../services/imageFetcher';
+import { fetchGameDataFromWikidata } from './gameDataFetcher';
+import { LocalSteamGame } from './steamLocalScanner';
+import { launchEmulator, launchSteamGame } from './gameLauncher';
 
 // --- Helpers de Rutas ---
 function getGamesFilePath(): string {
@@ -51,21 +55,46 @@ export async function saveGames(games: Game[]): Promise<void> {
     await fs.writeFile(filePath, JSON.stringify(games, null, 2));
 }
 
-export async function deleteGame(gameID: string) {
+export async function deleteGame(gameId: string) {
     const games = await getGames();
-    const gameIndex = games.findIndex(g => g.id == gameID)
+    const gameIndex = games.findIndex(g => g.id == gameId)
 
     if (gameIndex === -1) {
-        console.warn(`attempt to delete non-existent game, with ID: ${gameID}`)
+        console.warn(`attempt to delete non-existent game, with ID: ${gameId}`)
     } else {
-        await deleteGameImages(gameID);
+        await deleteGameImages(gameId);
         games.splice(gameIndex, 1);
         await saveGames(games);
     }
 }
 
-export async function updatePlaytime(gameID: string, additionalMinutes: number): Promise<void> {
-    const game = await getGameData(gameID);
+/**
+ * Inicia la instalación de un juego en Steam (si no está instalado).
+ * @param gameId ID interno del juego
+ * @returns true si se pudo abrir el enlace de Steam, false si no
+ */
+export async function installGame(gameId: string): Promise<boolean> {
+    const game = await getGameData(gameId);
+    if (!game) {
+        console.error(`[installGame] Juego ${gameId} no encontrado`);
+        return false;
+    }
+
+    if (game.source === GameSource.STEAM && (game as SteamGame).steamAppId) {
+        const steamUrl = `steam://install/${(game as SteamGame).steamAppId}`;
+        console.log(`[installGame] Abriendo ${steamUrl}`);
+        await shell.openExternal(steamUrl);
+        return true;
+    }
+
+    // Para otros tipos de juego (manual, ROM), podríamos abrir el directorio o mostrar un diálogo.
+    // Por ahora solo soportamos Steam.
+    console.warn(`[installGame] No se puede instalar el juego ${gameId} (source: ${game.source})`);
+    return false;
+}
+
+export async function updatePlaytime(gameId: string, additionalMinutes: number): Promise<void> {
+    const game = await getGameData(gameId);
     if (game) {
         game.playtimeMinutes += additionalMinutes;
         game.lastPlayedAt = new Date();
@@ -91,4 +120,67 @@ export async function getGameIdsByCategory(categoryIds: string[]): Promise<strin
     return games
         .filter(game => game.categories?.some(catId => categoryIds.includes(catId)))
         .map(game => game.id);
+}
+
+
+
+export async function addManualGame(gameData: ExecutableGame): Promise<string> {
+    const newId = crypto.randomUUID();
+
+    const fetchedGameData = await fetchGameDataFromWikidata(gameData.title);
+
+    console.log("Wikidatainfo: ", fetchedGameData);
+
+    if (fetchedGameData?.developer != null) gameData.developers = [fetchedGameData?.developer];
+    if (fetchedGameData?.description != null) gameData.description = fetchedGameData.description;
+    if (fetchedGameData?.genres != null) gameData.genres = fetchedGameData.genres;
+    if (fetchedGameData?.releaseDate != null) gameData.releaseDate = new Date(fetchedGameData.releaseDate);
+    if (fetchedGameData?.publisher != null) gameData.publishers = [fetchedGameData.publisher]
+
+    const newGame: ExecutableGame = {
+        ...gameData,
+        id: newId,
+        addedAt: new Date(),
+        playtimeMinutes: 0,
+        source: GameSource.MANUAL,
+    };
+
+    await saveGame(newGame);
+    await fetchAllGameImages(newGame.id);
+
+    return newId;
+}
+
+export async function addSteamGame(sg: LocalSteamGame): Promise<string> {
+    const newId = crypto.randomUUID();
+
+    const steamGame: SteamGame = {
+        id: newId,
+        installPath: sg.installDir,
+        title: sg.name,
+        steamAppId: sg.appId,
+        source: GameSource.STEAM,
+        isInstalled: true,
+        isHidden: false,
+        gameImages: {
+
+        },
+        playtimeMinutes: 0,
+        addedAt: new Date(),
+        completionStatus: GameCompletionStatus.PENDING,
+    }
+
+    const fetchedGameData = await fetchGameDataFromWikidata(sg.name);
+
+    if (fetchedGameData?.developer != null) steamGame.developers = [fetchedGameData?.developer];
+    if (fetchedGameData?.description != null) steamGame.description = fetchedGameData.description;
+    if (fetchedGameData?.genres != null) steamGame.genres = fetchedGameData.genres;
+    if (fetchedGameData?.releaseDate != null) steamGame.releaseDate = new Date(fetchedGameData.releaseDate);
+    if (fetchedGameData?.publisher != null) steamGame.publishers = [fetchedGameData.publisher]
+
+
+    await saveGame(steamGame);
+    await fetchAllGameImages(steamGame.id);
+
+    return newId;
 }

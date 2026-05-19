@@ -7,11 +7,12 @@
     </div>
     <div id="modal-form-container" style="display:none;">
       <form id="settings-form">
-        <div >
+        <!-- //SGDB -->
+        <div>
           <label>
             <input type="checkbox" id="steamgriddb-enabled"> Enable SteamGridDB
           </label>
-          <div class="form-group" id="steamgriddb-api-group" >
+          <div class="form-group" id="steamgriddb-api-group">
             <label>SteamGridDB API Key</label>
             <input type="text" id="steamgriddb-api-key" placeholder="Enter your API key">
             <div class="help-text">
@@ -20,9 +21,49 @@
             </div>
           </div>
         </div>
+        <!-- //DEFAULT WINE PREFIX -->
+        <div>
+          <div class="form-group">
+            <label>Default Proton Prefix Folder</label>
+            <div class="path-selector">
+              <input type="text" id="wine-prefix">
+              <button type="button" class="btn btn-secondary" id="btn-browse-prefix">
+                <i class="bi bi-folder-fill"></i>
+                Examine
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- //Steam Integration -->
+
+        <div>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="steam-enabled"> Enable Steam Integration
+            </label>
+            <label>Steam ApiKey</label>
+
+            <input type="text" id="steam-api-key">
+
+            <div class="help-text">
+              Get your API key from <a href="https://steamcommunity.com/dev/apikey"
+                target="_blank">steamcommunity.com</a>
+            </div>
+            <label>Steam ClientID</label>
+            <input type="text" id="steam-client-id" readonly>
+
+            <button class="btn btn-primary" id="btn-steam-login">
+              <i class="bi bi-steam"></i>
+              LogIn
+            </button>
+
+          </div>
+        </div>
+
         <div class="form-group">
           <label>
             <input type="checkbox" id="launch-fullscreen"> Start in fullscreen
+
           </label>
         </div>
         <div class="modal-buttons">

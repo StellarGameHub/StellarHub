@@ -2,21 +2,31 @@
     --border-width: 2px;
 }
 
+/* =========================
+   Base Card
+========================= */
+
 .game-card {
     position: relative;
     display: block;
     min-width: 10rem;
-    margin: 10px;
     height: fit-content;
+<<<<<<< HEAD
 
     transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
         box-shadow 0.25s ease,
         border-color 0.25s ease;
+=======
+    margin: 10px;
+>>>>>>> 5bcb215 (Multiple Improvements)
 
     cursor: pointer;
+    overflow: hidden;
+
     background: var(--surface);
     border: var(--border-width) solid transparent;
     border-radius: var(--border-radius);
+<<<<<<< HEAD
     box-shadow: var(--shadow-md);
     overflow: hidden;
 
@@ -30,22 +40,40 @@
 
 .game-card.gc-portrait {
     width: 17%;
+=======
+
+    box-shadow: var(--shadow-md);
+
+    transition:
+        transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+
+    will-change: transform;
+    content-visibility: auto;
+>>>>>>> 5bcb215 (Multiple Improvements)
 }
 
 .game-card:hover {
     transform: scale(1.05);
     background: var(--surface-hover);
-    border: var(--border-width) solid var(--border-color);
-    /* Elevate shadow on hover */
+    border-color: var(--border-color);
     box-shadow: var(--shadow-lg);
-    /* Bring card to front so it overlaps neighbors smoothly */
     z-index: 2;
 }
 
 .game-card.selected {
+<<<<<<< HEAD
     border-color: var(--primary);
     transform: scale(1.03);
     z-index: 1;
+=======
+    z-index: 1;
+
+    transform: scale(1.03);
+    border-color: var(--primary);
+
+>>>>>>> 5bcb215 (Multiple Improvements)
     box-shadow:
         0 12px 24px color-mix(in srgb, var(--primary) 10%, transparent),
         0 0 15px color-mix(in srgb, var(--primary) 20%, transparent),
@@ -57,11 +85,58 @@
     z-index: 2;
 }
 
+<<<<<<< HEAD
+.game-cover {
+    display: block;
+    width: 100%;
+    object-fit: cover;
+=======
+/* =========================
+   Card Variants
+========================= */
+
+.game-card.gc-wide {
+    width: calc(25% - (var(--gap) * 2));
+>>>>>>> 5bcb215 (Multiple Improvements)
+}
+.game-card.gc-wide .game-title {
+    display: none;
+}
+
+.game-card.gc-portrait {
+    width: 17%;
+}
+
+.game-card.gc-list {
+    display: block;
+
+    width: calc(100% - 5rem);
+    height: 70px;
+
+    margin: 0.25rem 2.5rem;
+}
+
+/* =========================
+   Cover
+========================= */
+
 .game-cover {
     display: block;
     width: 100%;
     object-fit: cover;
 }
+
+.gc-wide .game-cover {
+    aspect-ratio: 92 / 43;
+}
+
+.gc-portrait .game-cover {
+    aspect-ratio: 2 / 3;
+}
+
+/* =========================
+   Info Overlay
+========================= */
 
 .gc-wide .game-cover {
     aspect-ratio: 92/43;
@@ -75,43 +150,156 @@
 
 .game-info {
     position: absolute;
+    right: 0;
     bottom: 0;
     left: 0;
+<<<<<<< HEAD
     right: 0;
     background: rgba(11, 14, 20, 0.75);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+=======
+
+>>>>>>> 5bcb215 (Multiple Improvements)
     padding: var(--padding);
+
     text-align: center;
+<<<<<<< HEAD
     /* Oculto */
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
     /* Previene click cuando esta oculto */
+=======
+
+    background: rgba(11, 14, 20, 0.75);
+
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+
+    opacity: 0;
+>>>>>>> 5bcb215 (Multiple Improvements)
     pointer-events: none;
+
+    transition: opacity 0.2s ease-in-out;
 }
 
-/* Show .game-info on hover */
 .game-card:hover .game-info {
     opacity: 1;
-    /* Re-enable clicks for buttons */
     pointer-events: auto;
 }
 
+/* =========================
+   Title
+========================= */
+
 .game-title {
-    font-size: 1rem;
     margin: 0 0 4px;
-    white-space: nowrap;
+
     overflow: hidden;
-    text-overflow: ellipsis;
-    /* Make text stand out against the blurred background */
+
+    font-size: 1rem;
     font-weight: 600;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
+
+/* =========================
+   Buttons
+========================= */
 
 .game-buttons {
     display: flex;
     flex-direction: column;
     gap: var(--gap);
+
     padding: var(--padding);
+
     transition: background 0.2s;
+    z-index: 4;    
+}
+
+/* =========================
+   List Mode Layout
+========================= */
+
+.gc-list .game-card-inner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+
+    width: 100%;
+    height: 100%;
+}
+
+.gc-list .game-cover {
+    width: auto;
+    height: calc(100% - 0.5rem);
+
+    margin: 0 0.25rem;
+
+    flex-shrink: 0;
+
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+
+    border-radius: var(--border-radius);
+}
+
+.gc-list .game-info {
+    position: static;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    flex-grow: 1;
+
+    width: 100%;
+    height: 100%;
+
+    padding: 0 20px;
+
+    background: transparent;
+
+    opacity: 1;
+    pointer-events: auto;
+
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.gc-list .game-title {
+    margin: 0;
+    padding-right: 20px;
+
+    overflow: hidden;
+
+    font-size: 1.1rem;
+    font-weight: 600;
+
+    text-align: left;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    text-shadow: none;
+}
+
+.gc-list .game-buttons {
+    flex-direction: row;
+    gap: var(--gap);
+
+    padding: 0;
+
+    flex-shrink: 0;
+}
+
+.game-card.gc-list:hover .game-info {
+    opacity: 1;
+    background: transparent;
 }

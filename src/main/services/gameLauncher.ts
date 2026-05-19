@@ -1,6 +1,6 @@
 // src/main/services/gameLauncherService.ts
 import { spawn, ChildProcess } from 'child_process';
-import { LaunchConfig, RomGame } from '../../shared/types';
+import { LaunchConfig, RomGame, SteamGame } from '../../shared/types';
 import { BrowserWindow } from 'electron';
 
 
@@ -128,6 +128,20 @@ export async function launchGame(
     // Retornamos el PID tan pronto como se pueda (no necesitamos esperar el evento 'spawn')
     // El proceso ya se está ejecutando.
     return pid;
+}
+
+
+/**
+ * Lanza un juego de Steam.
+ */
+export async function launchSteamGame(
+    steamGame: SteamGame,
+    onExit?: (durationMinutes: number) => void
+): Promise<number> {
+
+    // usar steam -applaunch
+    console.log(`[GameLauncher] Lanzando juego de Steam ${steamGame.id} con steam -applaunch ${steamGame.id}`);
+    return launchGame('steam', ['-applaunch', steamGame.steamAppId.toString()], steamGame.id, onExit);
 }
 
 export function killGame(gameId: string): boolean {

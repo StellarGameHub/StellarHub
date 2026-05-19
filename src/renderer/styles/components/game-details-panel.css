@@ -4,13 +4,14 @@ game-details-panel {
     background-color: color-mix(in srgb, var(--surface) 95%, transparent);
     flex: 1;
     color: var(--text-color);
-    height: 100%;
     border-radius: var(--border-radius);
     overflow-y: auto;
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
     z-index: 2;
+    margin: 0.5rem;
+    height: calc(100% - 1rem);
 }
 
 .gdp-hero-conatiner {
@@ -106,6 +107,7 @@ game-details-panel {
     grid-template-columns: 1fr 2fr;
     padding: 2rem var(--padding);
     gap: 3rem;
+    overflow-y: auto;    
 }
 
 .gdp-details-item {

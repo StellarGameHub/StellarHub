@@ -147,13 +147,12 @@ let currentLayout: DocumentFragment | null = null;
 
 // Renderiza el layout según el modo actual
 async function renderCurrentLayout() {
-  console.log('Rendering layout for mode:', getUIMode());
   const games = await fetchGames();
   const mode = getUIMode();
   const appContainer = document.querySelector('#div-app') as HTMLElement;
 
   if (mode === 'desktop') {
-    currentLayout = renderDesktopLayout(games);
+    currentLayout = await renderDesktopLayout(games);
     appContainer.replaceChildren(currentLayout);
 
     stopGamepadListening(); // Aseguramos que el gamepad no escuche en modo escritorio    
@@ -183,10 +182,7 @@ window.addEventListener('keydown', (e) => {
     toggleFullscreenUI();
   }
 });
-// Escuchar evento de actualización de juegos para re-renderizar
-window.addEventListener('games-updated', () => {
-  renderCurrentLayout();
-});
+
 
 
 initLayoutFromSettings();

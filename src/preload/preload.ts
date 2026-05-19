@@ -6,5 +6,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   quitApp: () => ipcRenderer.send('app-quit'),
   onGameExited: (callback: (gameId: string) => void) => {
     ipcRenderer.on('game-exited', (_, gameId) => callback(gameId));
+  },
+  onBackgroundTask: (callback: (event: any) => void) => {
+    ipcRenderer.on('background-task', (_, data) => callback(data));
+  },  
+  removeBackgroundTaskListener: () => {
+    ipcRenderer.removeAllListeners('background-task');
   }
 });

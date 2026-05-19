@@ -6,17 +6,17 @@ export class GameDetailsPanel extends HTMLElement {
 
     //private gameIsRunning: boolean = false;
     // private runningGames: Map<string, boolean> = new Map();
-    private _gameID: string | null = null;
+    private _gameId: string | null = null;
 
     private boundOnGameStarted: (gameId: string) => void;
     private boundOnGameStopped: (gameId: string) => void;
 
-    set gameID(gameID: string) {
-        this._gameID = gameID;
+    set gameId(gameId: string) {
+        this._gameId = gameId;
         this.updatePanel();
     }
-    get gameID(): string | null {
-        return this._gameID;
+    get gameId(): string | null {
+        return this._gameId;
     }
 
     constructor() {
@@ -38,28 +38,28 @@ export class GameDetailsPanel extends HTMLElement {
     }
 
     private onGameStarted = (gameId: string) => {
-        if (gameId === this.gameID) {
+        if (gameId === this.gameId) {
             //this.gameIsRunning = true;
-            this.updatePlayButton();
+            this.updatePlayButton(true);
         }
     };
 
     private onGameStopped = (gameId: string) => {
-        if (gameId === this.gameID) {
+        if (gameId === this.gameId) {
             //this.gameIsRunning = false;
-            this.updatePlayButton();
+            this.updatePlayButton(true);
         }
     };
 
     private async launchGame() {
-        if (!this.gameID) return;
-        const result = await gameSession.launchGame(this.gameID);
+        if (!this.gameId) return;
+        const result = await gameSession.launchGame(this.gameId);
         if (!result.success) alert('Error: ' + result.error);
     }
 
     private async stopGame() {
-        if (!this.gameID) return;
-        await gameSession.stopGame(this.gameID);
+        if (!this.gameId) return;
+        await gameSession.stopGame(this.gameId);
     }
 
     attachEvents() {
@@ -70,8 +70,8 @@ export class GameDetailsPanel extends HTMLElement {
         playButton?.addEventListener("click", async (e) => {
             e.stopPropagation();
 
-            if (!this.gameID) return;
-            const gameIsRunning = gameSession.isGameRunning(this.gameID);
+            if (!this.gameId) return;
+            const gameIsRunning = gameSession.isGameRunning(this.gameId);
 
             if (gameIsRunning) {
                 await this.stopGame();
@@ -85,8 +85,23 @@ export class GameDetailsPanel extends HTMLElement {
         deleteButton?.addEventListener("click", async (e) => {
             e.stopPropagation();
 
-            await window.electronAPI.invoke("delete-game-by-id", this.gameID)
+            const result = await window.electronAPI.invoke("delete-game-by-id", this.gameId)
+            if (result.success) {
+                window.dispatchEvent(new CustomEvent('games-updated'));
+            }
+
             this.updatePanel();
+        })
+
+        // Install Button
+        const installButton = this.querySelector("#btn-gdp-install") as HTMLButtonElement;
+        installButton?.addEventListener("click", async (e) => {
+            e.stopPropagation();
+
+            const result = await window.electronAPI.invoke("install-game-by-id", this.gameId);
+            if (result.success) {
+                this.updatePanel()
+            }
         })
 
         // CONFIG MENU DROPDOWN
@@ -107,7 +122,7 @@ export class GameDetailsPanel extends HTMLElement {
     }
 
     private async updatePanel() {
-        const game = await window.electronAPI.invoke('get-game-detail', this._gameID) as Game;
+        const game = await window.electronAPI.invoke('get-game-detail', this._gameId) as Game;
         const gameDetailsPanel = this.querySelector("#game-details-panel");
 
         if (!game) {
@@ -145,7 +160,23 @@ export class GameDetailsPanel extends HTMLElement {
         const desktopBackground = document.querySelector("#ds-background-img") as HTMLImageElement;
         if (desktopBackground) this.transitionImage(desktopBackground, `stellarhub://${game.gameImages.hero}`, 300);
 
+        //Info del game:
+        this.cleanDetailsPanel()
 
+        const spanDeveloper = this.querySelector("#gdp-span-developer") as HTMLElement;
+        if (spanDeveloper && game.developers) spanDeveloper.textContent = game.developers.concat().toString();
+
+        const spanDescription = this.querySelector("#gdp-span-description") as HTMLElement;
+        if (spanDescription && game.description) spanDescription.textContent = game?.description;
+
+        const spanPublisher = this.querySelector("#gdp-span-publisher") as HTMLElement;
+        if (spanPublisher && game.publishers) spanPublisher.textContent = game?.publishers?.concat().toString();
+
+        const spanDate = this.querySelector("#gdp-span-date") as HTMLElement;
+        if (spanDate && game.releaseDate) spanDate.textContent = game?.releaseDate.toDateString();
+
+        const spanGenres = this.querySelector("#gdp-span-genres") as HTMLElement;
+        if (spanGenres && game.genres) spanGenres.textContent = game?.genres.concat().toString();
 
         //Hidde dropdown if it is shown
 
@@ -153,31 +184,59 @@ export class GameDetailsPanel extends HTMLElement {
         const dropdownElement = menuButton.closest('.dropdown')
         if (dropdownElement) dropdownElement.querySelector(".dropdown-content")?.classList.remove('open');
 
-        this.updatePlayButton();
+        this.updatePlayButton(game.isInstalled);
 
         gameDetailsPanel?.classList.remove("hidden")
     }
 
-    updatePlayButton() {
+    cleanDetailsPanel() {
+        const spanDeveloper = this.querySelector("#gdp-span-developer") as HTMLElement;
+        if (spanDeveloper) spanDeveloper.textContent = "";
 
-        if (!this.gameID) return;
+        const spanDescription = this.querySelector("#gdp-span-description") as HTMLElement;
+        if (spanDescription) spanDescription.textContent = "";
+
+        const spanPublisher = this.querySelector("#gdp-span-publisher") as HTMLElement;
+        if (spanPublisher) spanPublisher.textContent = "";
+
+        const spanDate = this.querySelector("#gdp-span-date") as HTMLElement;
+        if (spanDate) spanDate.textContent = "";
+
+        const spanGenres = this.querySelector("#gdp-span-genres") as HTMLElement;
+        if (spanGenres) spanGenres.textContent = "";
+    }
+
+    updatePlayButton(isInstalled: boolean) {
+
+        if (!this.gameId) return;
 
         const playButton = this.querySelector("#btn-gdp-play") as HTMLButtonElement;
+        const installButton = this.querySelector("#btn-gdp-install") as HTMLButtonElement;
         const playBttonTextSpan = playButton.querySelector("span");
         const playBttonIcon = playButton.querySelector("i");
 
 
-        const gameIsRunning = gameSession.isGameRunning(this.gameID);
-
-        if (gameIsRunning) {
-            playButton.classList.replace('btn-primary', 'btn-tertiary');
-            if (playBttonTextSpan) playBttonTextSpan.textContent = 'Stop';
-            if (playBttonIcon) playBttonIcon.className = 'bi bi-stop-fill'
+        if (!isInstalled) {
+            installButton.classList.remove("display-none");
+            playButton.classList.add("display-none");
         } else {
-            playButton.classList.replace('btn-tertiary', 'btn-primary');
-            if (playBttonTextSpan) playBttonTextSpan.textContent = 'Play';
-            if (playBttonIcon) playBttonIcon.className = 'bi bi-play-fill'
+
+            installButton.classList.add("display-none");
+            playButton.classList.remove("display-none");
+
+            const gameIsRunning = gameSession.isGameRunning(this.gameId);
+
+            if (gameIsRunning) {
+                playButton.classList.replace('btn-primary', 'btn-tertiary');
+                if (playBttonTextSpan) playBttonTextSpan.textContent = 'Stop';
+                if (playBttonIcon) playBttonIcon.className = 'bi bi-stop-fill'
+            } else {
+                playButton.classList.replace('btn-tertiary', 'btn-primary');
+                if (playBttonTextSpan) playBttonTextSpan.textContent = 'Play';
+                if (playBttonIcon) playBttonIcon.className = 'bi bi-play-fill'
+            }
         }
+
     }
 
 
