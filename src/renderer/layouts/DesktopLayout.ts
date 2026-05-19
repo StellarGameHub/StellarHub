@@ -23,11 +23,7 @@ import '../styles/components/desktop-menu.css'
 import '../styles/components/game-details-panel.css'
 import { AppSettingsModal } from '../components/desktop/modals/AppSettingsModal';
 import { GameDetailsPanel } from '../components/desktop/GameDetailsPanel';
-<<<<<<< HEAD
-import { GameCardStyle } from '../../shared/enums';
-=======
 import { DesktopViewType, GameCardStyle } from '../../shared/enums';
->>>>>>> 5bcb215 (Multiple Improvements)
 
 //To save the cards
 const gameCards: GameCard[] = [];
@@ -38,21 +34,15 @@ let desktopLayout: DocumentFragment | undefined = undefined;
 export async function renderDesktopLayout(games: GameSummary[]): Promise<DocumentFragment> {
 
 
-<<<<<<< HEAD
     //To save the cards
     const gameCards: GameCard[] = [];
 
-=======
->>>>>>> 5bcb215 (Multiple Improvements)
     const template = document.createElement('template');
     template.innerHTML = desktopLayoutHTML;
 
     desktopLayout = template.content;
 
-<<<<<<< HEAD
-    console.log("Contenido del DesktopLaytour", content)
-
-    const grid = content.querySelector('#ds-grid') as HTMLElement;
+    const grid = desktopLayout.querySelector('#ds-grid') as HTMLElement;
 
     games.forEach(game => {
 
@@ -63,9 +53,7 @@ export async function renderDesktopLayout(games: GameSummary[]): Promise<Documen
         grid.appendChild(card);
         gameCards.push(card);
     });
-=======
     await updateGames();
->>>>>>> 5bcb215 (Multiple Improvements)
 
     //PRUEBA DE CAMBIAR LOS ESTILOS EN TIEMPO DE EJECUCION:
     

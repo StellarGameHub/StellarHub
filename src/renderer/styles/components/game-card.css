@@ -11,14 +11,7 @@
     display: block;
     min-width: 10rem;
     height: fit-content;
-<<<<<<< HEAD
-
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-        box-shadow 0.25s ease,
-        border-color 0.25s ease;
-=======
     margin: 10px;
->>>>>>> 5bcb215 (Multiple Improvements)
 
     cursor: pointer;
     overflow: hidden;
@@ -26,21 +19,6 @@
     background: var(--surface);
     border: var(--border-width) solid transparent;
     border-radius: var(--border-radius);
-<<<<<<< HEAD
-    box-shadow: var(--shadow-md);
-    overflow: hidden;
-
-    will-change: transform;
-    content-visibility: auto;
-}
-
-.game-card.gc-wide {
-    width: 47%;
-}
-
-.game-card.gc-portrait {
-    width: 17%;
-=======
 
     box-shadow: var(--shadow-md);
 
@@ -51,7 +29,6 @@
 
     will-change: transform;
     content-visibility: auto;
->>>>>>> 5bcb215 (Multiple Improvements)
 }
 
 .game-card:hover {
@@ -63,17 +40,11 @@
 }
 
 .game-card.selected {
-<<<<<<< HEAD
-    border-color: var(--primary);
-    transform: scale(1.03);
-    z-index: 1;
-=======
     z-index: 1;
 
     transform: scale(1.03);
     border-color: var(--primary);
 
->>>>>>> 5bcb215 (Multiple Improvements)
     box-shadow:
         0 12px 24px color-mix(in srgb, var(--primary) 10%, transparent),
         0 0 15px color-mix(in srgb, var(--primary) 20%, transparent),
@@ -85,19 +56,12 @@
     z-index: 2;
 }
 
-<<<<<<< HEAD
-.game-cover {
-    display: block;
-    width: 100%;
-    object-fit: cover;
-=======
 /* =========================
    Card Variants
 ========================= */
 
 .game-card.gc-wide {
     width: calc(25% - (var(--gap) * 2));
->>>>>>> 5bcb215 (Multiple Improvements)
 }
 .game-card.gc-wide .game-title {
     display: none;
@@ -138,38 +102,15 @@
    Info Overlay
 ========================= */
 
-.gc-wide .game-cover {
-    aspect-ratio: 92/43;
-}
-
-.gc-portrait .game-cover {
-    aspect-ratio: 2/3;
-}
-
-
-
 .game-info {
     position: absolute;
     right: 0;
     bottom: 0;
     left: 0;
-<<<<<<< HEAD
-    right: 0;
-    background: rgba(11, 14, 20, 0.75);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-=======
 
->>>>>>> 5bcb215 (Multiple Improvements)
     padding: var(--padding);
 
     text-align: center;
-<<<<<<< HEAD
-    /* Oculto */
-    opacity: 0;
-    transition: opacity 0.2s ease-in-out;
-    /* Previene click cuando esta oculto */
-=======
 
     background: rgba(11, 14, 20, 0.75);
 
@@ -177,7 +118,6 @@
     -webkit-backdrop-filter: blur(4px);
 
     opacity: 0;
->>>>>>> 5bcb215 (Multiple Improvements)
     pointer-events: none;
 
     transition: opacity 0.2s ease-in-out;

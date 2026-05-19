@@ -183,10 +183,6 @@ li {
 
 .dropdown-button {
   anchor-name: --dropdown-button;
-<<<<<<< HEAD
-  ;
-=======
->>>>>>> 5bcb215 (Multiple Improvements)
 }
 
 .dropdown-menu {
@@ -201,13 +197,6 @@ li {
   padding: var(--padding);
   position: absolute;
   position-anchor: dropdown-button;
-<<<<<<< HEAD
-  position-area: bottom right;
-  margin: initial;
-}
-
-.dropdown-menu:popover-open {
-=======
   position-area: bottom span-right;
   margin: initial;
   color: var(--text-color);
@@ -257,13 +246,10 @@ li {
 }
 
 .hover-menu:hover>div {
->>>>>>> 5bcb215 (Multiple Improvements)
   display: flex;
   margin: initial;
 }
 
-<<<<<<< HEAD
-=======
 .checkbox {
   display: flex;
   color: var(--text-color);
@@ -274,7 +260,6 @@ li {
   width: 16px;
 }
 
->>>>>>> 5bcb215 (Multiple Improvements)
 
 
 /* === MODERN SELECT === */
