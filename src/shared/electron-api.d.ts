@@ -22,6 +22,19 @@ export interface ElectronAPI {
   */
   onBackgroundTask(callback: (taskEvent: { taskId: string; type: string; message: string; progress?: number; error?: string }) => void): void;
 
+  onGamesUpdated(callback: () => void): void;
+  onGameImagesUpdated(callback: () => void): void;
+
+  /**
+ * Consulta si la ventana principal está maximizada.
+ * @returns Promesa con booleano.
+ */
+  isWindowMaximized(): Promise<boolean>;
+
+  /**
+   * Alterna entre maximizado y restaurado.
+   */
+  toggleMaximize(): Promise<void>;
 
   quitApp(): void;
 }

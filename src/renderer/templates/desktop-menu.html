@@ -52,6 +52,19 @@
                 </div>
             </div>
 
+            <span class="">Installed</span>
+            <hr>
+            <div>
+                <div class="checkbox">
+                    <label>Installed</label>
+                    <input type="checkbox" value="gs-installed" checked />
+                </div>
+                <div class="checkbox">
+                    <label>Unistalled</label>
+                    <input type="checkbox" value="gs-uninstalled" checked />
+                </div>
+            </div>
+
         </div>
 
 
@@ -64,7 +77,10 @@
         <task-toast></task-toast>
 
         <span class="spacer"></span>
-        <button id="close-app-btn" class="btn btn-secondary">
+        <button id="btn-maximize-app" class="btn btn-secondary">
+            <i class="bi bi-fullscreen"></i>
+        </button>
+        <button id="btn-close-app" class="btn btn-secondary">
             Exit
             <i class="bi bi"></i>
         </button>

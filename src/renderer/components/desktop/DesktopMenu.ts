@@ -1,5 +1,6 @@
 import { DesktopViewType } from '../../../shared/enums';
 import desktopMenuHTML from '../../templates/desktop-menu.html?raw';
+import appIconUrl from '../../assets/icons/app-icon.svg';
 
 export class DesktopMenu extends HTMLElement {
     connectedCallback() {
@@ -9,6 +10,10 @@ export class DesktopMenu extends HTMLElement {
 
     render() {
         this.innerHTML = desktopMenuHTML;
+        const logoImg = document.getElementById('ds-navbar-logo') as HTMLImageElement;
+        if (logoImg) {
+            logoImg.src = appIconUrl;
+        }
     }
 
     attachEvents() {
@@ -70,9 +75,23 @@ export class DesktopMenu extends HTMLElement {
             ));
         });
         //Button to quit app
-        document.getElementById('close-app-btn')?.addEventListener('click', () => {
+        document.querySelector('#btn-close-app')?.addEventListener('click', () => {
             window.electronAPI.quitApp();
         });
+
+        const maxBtn = document.querySelector('#btn-maximize-app') as HTMLButtonElement;
+
+        async function updateMaximizeButton() {
+            const isMax = await window.electronAPI.isWindowMaximized();
+            const icon = maxBtn.querySelector("i");
+            if (icon) icon.className = isMax ? 'bi bi-fullscreen-exit' : 'bi bi-fullscreen';
+        }
+        //Button to maximize
+        maxBtn?.addEventListener('click', () => {
+            window.electronAPI.toggleMaximize();
+            updateMaximizeButton();
+        });
+
         //Switch Views Buttons
         this.querySelector("#ds-button-view-wide")?.addEventListener('click', () => {
             this.dispatchEvent(new CustomEvent(
@@ -156,3 +175,4 @@ export class DesktopMenu extends HTMLElement {
 if (!customElements.get('desktop-menu')) {
     customElements.define('desktop-menu', DesktopMenu);
 }
+

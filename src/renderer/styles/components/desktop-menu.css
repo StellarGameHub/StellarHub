@@ -64,7 +64,7 @@
     transition:
         max-width var(--transition-fluid),
         transform var(--transition-fluid),
-        opacity 0.3s ease;
+        opacity 0.3s ease;        
 }
 
 .ds-menu.open .ds-brand-text-container {

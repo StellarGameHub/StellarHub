@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron';
-import { runScan, getScanConfigs, saveScanConfig, deleteScanConfig, updateScanDate } from '../services/romScannerService';
+import { runRomsScan, getScanConfigs, saveScanConfig, deleteScanConfig, updateScanDate } from '../services/romScannerService';
 
 export function registerRomScanHandlers() {
   ipcMain.handle('get-scan-configs', async () => {
@@ -20,7 +20,7 @@ export function registerRomScanHandlers() {
     const configs = await getScanConfigs();
     const config = configs.find(c => c.id === configId);
     if (!config) throw new Error(`Configuración ${configId} no encontrada`);
-    const result = await runScan(config);
+    const result = await runRomsScan(config);
     await updateScanDate(configId, new Date());
     return result;
   });

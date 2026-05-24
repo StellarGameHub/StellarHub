@@ -172,7 +172,7 @@ export class AddGameModal extends HTMLElement {
             description: '',
             developers: [],
             releaseDate: undefined,
-            images: { cover: '', grid: '', banner: '' },
+            gameImages: { grid: '', wideGrid: '', hero: '', logo: '', icon: '' },
             isInstalled: true,
             source: 'manual' as const,
             launchConfig: {

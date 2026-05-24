@@ -9,8 +9,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   onBackgroundTask: (callback: (event: any) => void) => {
     ipcRenderer.on('background-task', (_, data) => callback(data));
-  },  
+  },
   removeBackgroundTaskListener: () => {
     ipcRenderer.removeAllListeners('background-task');
-  }
+  },
+  onGamesUpdated: (callback: () => void) => {
+    ipcRenderer.on('games-updated', callback);
+  },
+  onGameImagesUpdated: (callback: () => void) => {
+    ipcRenderer.on('game-images-updated', callback);
+  },
+  isWindowMaximized: () => ipcRenderer.invoke('is-maximized'),
+  toggleMaximize: () => ipcRenderer.invoke('toggle-maximize'),
 });

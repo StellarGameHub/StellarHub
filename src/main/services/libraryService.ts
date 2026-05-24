@@ -2,13 +2,15 @@
 import { app, shell } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
-import { Game, ExecutableGame, LaunchConfig, GameSummary, SteamGame } from '../../shared/types';
+import { Game, ExecutableGame, LaunchConfig, GameSummary, SteamGame, BlacklistData, RomGame } from '../../shared/types';
 import { GameCompletionStatus, GameSource } from '../../shared/enums';
 import { deleteGameImages } from './imageService';
 import { fetchAllGameImages } from '../services/imageFetcher';
 import { fetchGameDataFromWikidata } from './gameDataFetcher';
 import { LocalSteamGame } from './steamLocalScanner';
 import { launchEmulator, launchSteamGame } from './gameLauncher';
+
+
 
 // --- Helpers de Rutas ---
 function getGamesFilePath(): string {
@@ -55,9 +57,14 @@ export async function saveGames(games: Game[]): Promise<void> {
     await fs.writeFile(filePath, JSON.stringify(games, null, 2));
 }
 
-export async function deleteGame(gameId: string) {
+export async function deleteGame(gameId: string, blackListGame: boolean) {
     const games = await getGames();
     const gameIndex = games.findIndex(g => g.id == gameId)
+
+
+    if (blackListGame) {
+        await addToBlacklist(games[gameIndex]);
+    }
 
     if (gameIndex === -1) {
         console.warn(`attempt to delete non-existent game, with ID: ${gameId}`)
@@ -67,6 +74,7 @@ export async function deleteGame(gameId: string) {
         await saveGames(games);
     }
 }
+
 
 /**
  * Inicia la instalación de un juego en Steam (si no está instalado).
@@ -183,4 +191,87 @@ export async function addSteamGame(sg: LocalSteamGame): Promise<string> {
     await fetchAllGameImages(steamGame.id);
 
     return newId;
+}
+
+// ============
+// BLACK LIST
+// ============
+
+const BLACKLIST_FILE = 'black-list.json';
+
+async function getBlacklistPath(): Promise<string> {
+    return path.join(app.getPath('userData'), BLACKLIST_FILE);
+}
+
+async function readBlacklist(): Promise<BlacklistData> {
+    try {
+        const data = await fs.readFile(await getBlacklistPath(), 'utf-8');
+        return JSON.parse(data);
+    } catch {
+        // Si no existe, devolver estructura vacía
+        return { steam: [], rom: [], manual: [] };
+    }
+}
+
+async function writeBlacklist(data: BlacklistData): Promise<void> {
+    await fs.writeFile(await getBlacklistPath(), JSON.stringify(data, null, 2));
+}
+
+export async function isGameBlocked(game: Game): Promise<boolean> {
+    const blacklist = await readBlacklist();
+    switch (game.source) {
+        case GameSource.STEAM:
+            const steamGame = game as SteamGame;
+            return blacklist.steam.includes(steamGame.steamAppId);
+        case GameSource.ROM:
+            const romGame = game as RomGame;
+            return blacklist.rom.includes(romGame.romDetails.romPath);
+        case GameSource.MANUAL:
+            return blacklist.manual.includes(game.id);
+        default:
+            return false;
+    }
+}
+
+export async function addToBlacklist(game: Game): Promise<void> {
+    console.log("Adding game to blackList:", game.title);
+    const blacklist = await readBlacklist();
+    switch (game.source) {
+        case GameSource.STEAM:
+            const steamGame = game as SteamGame;
+            if (!blacklist.steam.includes(steamGame.steamAppId)) {
+                blacklist.steam.push(steamGame.steamAppId);
+            }
+            break;
+        case GameSource.ROM:
+            const romGame = game as RomGame;
+            if (!blacklist.rom.includes(romGame.romDetails.romPath)) {
+                blacklist.rom.push(romGame.romDetails.romPath);
+            }
+            break;
+        case GameSource.MANUAL:
+            if (!blacklist.manual.includes(game.id)) {
+                blacklist.manual.push(game.id);
+            }
+            break;
+    }
+    await writeBlacklist(blacklist);
+}
+
+export async function removeFromBlacklist(game: Game): Promise<void> {
+    const blacklist = await readBlacklist();
+    switch (game.source) {
+        case GameSource.STEAM:
+            const steamGame = game as SteamGame;
+            blacklist.steam = blacklist.steam.filter(id => id !== steamGame.steamAppId);
+            break;
+        case GameSource.ROM:
+            const romGame = game as RomGame;
+            blacklist.rom = blacklist.rom.filter(p => p !== romGame.romDetails.romPath);
+            break;
+        case GameSource.MANUAL:
+            blacklist.manual = blacklist.manual.filter(id => id !== game.id);
+            break;
+    }
+    await writeBlacklist(blacklist);
 }

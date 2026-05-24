@@ -35,12 +35,20 @@ let lastMoveTime = 0;
 //COOLDOWN TO OPEN GAME
 const ACCEPT_COOLDOWN_MS = 500; // medio segundo
 let lastAcceptTime = 0;
+let isFullscreenActive = false;
 
 function updateSelection() {
   const cards = document.querySelectorAll('.game-card');
+  let gameChanged = false;
+
   cards.forEach((card, idx) => {
     if (idx === currentSelectedIndex) {
+      // Verificar si realmente estamos cambiando de juego antes de aplicar la clase
+      if (!card.classList.contains('selected')) {
+        gameChanged = true;
+      }
       card.classList.add('selected');
+
       window.dispatchEvent(new CustomEvent('game-selected', {
         bubbles: true,
         composed: true,
@@ -50,9 +58,35 @@ function updateSelection() {
       card.classList.remove('selected');
     }
   });
+
   const selectedCard = cards[currentSelectedIndex] as HTMLElement;
   if (selectedCard) {
-    selectedCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    selectedCard.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center'
+    });
+
+    // ANIMACIÓN CINEMATOGRÁFICA DE IMÁGENES
+    if (gameChanged) {
+      const bg = document.querySelector('.fs-background') as HTMLElement;
+      const heroImage = document.getElementById('fs-image') as HTMLImageElement;
+      const heroLogo = document.getElementById('fs-logo') as HTMLImageElement;
+
+      // 1. Apagamos sutilmente el fondo y preparamos el logo/banner
+      if (bg) bg.style.opacity = '0.05';
+      if (heroImage) heroImage.classList.add('fs-image-changing');
+      if (heroLogo) heroLogo.classList.add('fs-logo-changing');
+
+      // 2. Esperamos a que el navegador procese el cambio de imágenes (un pequeño delay)
+      setTimeout(() => {
+        // Aquí tu código ya habrá cambiado el src del bg, image y logo.
+        // Removemos las clases para que entren con la animación suave de CSS
+        if (bg) bg.style.opacity = '0.15';
+        if (heroImage) heroImage.classList.remove('fs-image-changing');
+        if (heroLogo) heroLogo.classList.remove('fs-logo-changing');
+      }, 150); // 150ms es el "sweet spot" ideal para no generar lag visual
+    }
   }
 }
 
@@ -81,35 +115,72 @@ function handleGamepadDirection(dx: number, dy: number, buttons: readonly Gamepa
   }
 }
 
+
+function handleVisibilityChange() {
+  if (document.hidden) {
+    manageGamepadListening(false); // Ventana oculta/otra pestaña -> Apagar
+  } else {
+    manageGamepadListening(true);  // Ventana visible de nuevo -> Encender
+  }
+}
+
+function handleWindowBlur() {
+  manageGamepadListening(false); // Clic fuera de la app/otra app encima -> Apagar
+}
+
+function handleWindowFocus() {
+  manageGamepadListening(true);  // Clic de vuelta en la app -> Encender
+}
+
+function manageGamepadListening(activate: boolean) {
+  if (activate && isFullscreenActive) {
+    // Solo iniciamos si la pantalla completa está activa Y la ventana tiene foco
+    startGamepadListening({
+      onDirectionChange: handleGamepadDirection,
+      onAccept: () => {
+        const now = Date.now();
+        if (now - lastAcceptTime < ACCEPT_COOLDOWN_MS) return;
+        lastAcceptTime = now;
+        const cards = document.querySelectorAll('.game-card');
+        const gameId = cards[currentSelectedIndex]?.getAttribute('data-game-id');
+        if (gameId) launchGame(gameId);
+      },
+      onBack: () => toggleFullscreenUI(),
+      onHome: () => toggleFullscreenUI(),
+    });
+  } else {
+    // Si pierde el foco o se cierra la UI, apagamos el listener del gamepad por completo
+    stopGamepadListening();
+  }
+}
+
 export function setupFullscreenGamepad() {
-  // Limpiar listener anterior si existe
+  isFullscreenActive = true;
+
   if (cleanupGamepad) {
     cleanupGamepad();
     cleanupGamepad = null;
   }
 
-  // Iniciar escucha de gamepad con callbacks mejorados
-  startGamepadListening({
-    onDirectionChange: handleGamepadDirection,
-    onAccept: () => {
-      const now = Date.now();
-      if (now - lastAcceptTime < ACCEPT_COOLDOWN_MS) return;
-      lastAcceptTime = now;
-      const cards = document.querySelectorAll('.game-card');
-      const gameId = cards[currentSelectedIndex]?.getAttribute('data-game-id');
-      if (gameId) launchGame(gameId);
-    },
-    onBack: () => {
-      toggleFullscreenUI();
-    },
-    onHome: () => toggleFullscreenUI(),
-  });
+  // Encendemos el gamepad inicialmente
+  manageGamepadListening(true);
 
+  // Escuchamos cuando el usuario cambia de pestaña o minimiza
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  // Escuchamos cuando el usuario hace clic en otra aplicación (pierde foco)
+  window.addEventListener('blur', handleWindowBlur);
+  window.addEventListener('focus', handleWindowFocus);
+
+  // Nuestra función de limpieza ahora también remueve estos listeners de la ventana
   cleanupGamepad = () => {
-    stopGamepadListening();
+    isFullscreenActive = false;
+    manageGamepadListening(false);
+
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+    window.removeEventListener('blur', handleWindowBlur);
+    window.removeEventListener('focus', handleWindowFocus);
   };
 
-  // Actualizar selección después de que el DOM se haya pintado
   requestAnimationFrame(updateSelection);
 }
 
@@ -157,7 +228,7 @@ async function renderCurrentLayout() {
 
     stopGamepadListening(); // Aseguramos que el gamepad no escuche en modo escritorio    
   } else {
-    currentLayout = renderFullscreenLayout(games);
+    currentLayout = await renderFullscreenLayout(games);
     appContainer.replaceChildren(currentLayout);
 
     // Configurar gamepad solo en modo fullscreen

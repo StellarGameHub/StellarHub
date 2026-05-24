@@ -4,9 +4,11 @@ import { app } from 'electron';
 import { AppSettings } from '../../shared/types';
 
 const SETTINGS_FILE = path.join(app.getPath('userData'), 'settings.json');
+console.log("Settings_File:", SETTINGS_FILE)
 
 const defaultSettings: AppSettings = {
   launchInFullscreen: false,
+  autoScanRoms: false,
   steamGridDB: {
     apiKey: undefined,
     enabled: false

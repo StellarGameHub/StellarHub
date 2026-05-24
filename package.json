@@ -1,7 +1,7 @@
 {
   "name": "stellarhub",
   "version": "0.1.0",
-  "description": "Lanzador de juegos para Linux inspirado en PlayNite",
+  "description": "Lanzador de juegos para Linux",
   "main": "dist/main/main.js",
   "scripts": {
     "build:main": "tsc -p tsconfig.main.json",
@@ -17,7 +17,7 @@
   },
   "build": {
     "appId": "com.stellarhub.app",
-    "productName": "StellarHub",
+    "productName": "StellarHub",  
     "directories": {
       "output": "release"
     },
@@ -47,7 +47,7 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
+    "@types/node": "^22.19.19",
     "@types/openid-client": "^3.1.6",
     "@types/sparql-http-client": "^3.1.0",
     "concurrently": "^9.2.1",

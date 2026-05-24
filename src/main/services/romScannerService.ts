@@ -1,10 +1,11 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { ScanConfig, RomGame } from '../../shared/types';
-import { getGames, saveGames } from './libraryService';
+import { getGames, isGameBlocked, saveGames } from './libraryService';
 import { GameCompletionStatus, GameSource } from '../../shared/enums';
 import { fetchImagesForGameList } from './imageFetcher';
 import { app } from 'electron';
+import { dispatchGamesUpdatedEvent } from '../utils/utils';
 
 
 const SCAN_CONFIGS_FILE = 'scan-configs.json';
@@ -67,7 +68,7 @@ async function writeConfigs(configs: ScanConfig[]): Promise<void> {
  * Escanea una carpeta según la configuración y actualiza la biblioteca.
  * @returns Número de juegos añadidos y eliminados (marcados como no instalados)
  */
-export async function runScan(config: ScanConfig): Promise<{ added: number; removed: number }> {
+export async function runRomsScan(config: ScanConfig): Promise<{ added: number; removed: number }> {
     const allGames = await getGames();
 
     const existingRoms = allGames.filter(g => g.source === GameSource.ROM && g.romDetails?.scanConfigId === config.id) as RomGame[];
@@ -101,13 +102,14 @@ export async function runScan(config: ScanConfig): Promise<{ added: number; remo
         if (!existingPaths.has(romPath)) {
             const gameId = `rom-${config.id}-${crypto.randomUUID()}`;
             const fileName = path.basename(romPath, path.extname(romPath));
+            const displayName = cleanRomTitle(fileName);
 
             const newGame: RomGame = {
                 id: gameId,
                 categories: config.categories || [],
                 completionStatus: GameCompletionStatus.PENDING,
                 isHidden: false,
-                title: fileName,
+                title: displayName,
                 description: '',
                 developers: [],
                 publishers: [],
@@ -132,6 +134,12 @@ export async function runScan(config: ScanConfig): Promise<{ added: number; remo
                     launchArguments: config.launchArguments,
                 },
             };
+
+            if (await isGameBlocked(newGame)) {
+                console.log(`[AutoScan] ROM bloqueada, omitiendo: ${newGame.title}`);
+                continue;
+            }
+
             added.push(newGame);
         }
     }
@@ -173,7 +181,50 @@ export async function runScan(config: ScanConfig): Promise<{ added: number; remo
             .filter((id, i, arr) => arr.indexOf(id) !== i)
     );
 
-    await saveGames(updatedGames);
+    await saveGames(updatedGames);    
     fetchImagesForGameList(added.map(rom => rom.id));
     return { added: added.length, removed: removed.length };
+}
+
+
+// src/main/services/romScannerService.ts
+
+/**
+ * Limpia el título de una ROM eliminando regiones, marcadores y etiquetas comunes.
+ * Ejemplo: "Super Mario World (USA) [!]" -> "Super Mario World"
+ */
+function cleanRomTitle(rawTitle: string): string {
+    // Eliminar extensiones conocidas (si llegara a tener alguna, aunque esperamos nombre sin extensión)
+    let cleaned = rawTitle.replace(/\.(zip|7z|iso|bin|cue|gba|nes|snes|n64|z64|nds|cia|cci|wbfs|rvz|chd)$/i, '');
+
+    // Patrones a eliminar
+    const patterns = [
+        // Regiones entre paréntesis
+        /\(([A-Za-z]+[-/\s&]+)*?(USA|Europe|Japan|JAP|World|Germany|France|Italy|Spain|UK|Australia|Brazil|Korea|China|Taiwan|Hong Kong|En,Fr,De,Es|En,Fr|En,De|Fr,De|En,Es|Es,It)\)/gi,
+        // Regiones entre corchetes
+        /\[([A-Za-z]+[-/\s&]+)*?(USA|Europe|Japan|JAP|World|Germany|France|Italy|Spain|UK|Australia|Brazil|Korea|China|Taiwan|Hong Kong)\]/gi,
+        // Etiquetas de dump (brackets con símbolos)
+        /\[[!bftphmo!]+\]/gi,
+        // Etiquetas de idioma entre paréntesis
+        /\((En|Fr|De|Es|It|Nl|Pt|Ru|Ja|Ko|Zh|Ar)\)/gi,
+        // Versiones y revisiones
+        /\(Rev\s?\d+\)/gi,
+        /\(v\d+\.\d+\)/gi,
+        // Discos / tracks
+        /\(Disc\s?\d+\)/gi,
+        /\(Track\s?\d+\)/gi,
+        // Sufijos como ` (USA)` ya capturados arriba, pero a veces sin paréntesis? No debería.
+    ];
+
+    for (const pattern of patterns) {
+        cleaned = cleaned.replace(pattern, '');
+    }
+
+    // Eliminar paréntesis o corchetes que hayan quedado vacíos
+    cleaned = cleaned.replace(/\(\s*\)/g, '').replace(/\[\s*\]/g, '');
+
+    // Limpiar espacios sobrantes
+    cleaned = cleaned.replace(/\s{2,}/g, ' ').trim();
+
+    return cleaned;
 }

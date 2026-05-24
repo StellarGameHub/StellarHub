@@ -64,9 +64,14 @@ export function registerGameHandlers() {
         return { success: killed };
     });
 
-    ipcMain.handle('delete-game-by-id', async (_, gameId: string) => {
+    ipcMain.handle('delete-game-by-id', async (_, data) => {
+        const gameId = data.gameId;
+        const blackList = data.blackList;
+
+        console.log("ipc recibed delete game with data:", data)
+
         try {
-            await deleteGame(gameId);
+            await deleteGame(gameId, blackList);
             return { success: true };
         } catch (error) {
             console.error(`Error deleting game ${gameId}:`, error);

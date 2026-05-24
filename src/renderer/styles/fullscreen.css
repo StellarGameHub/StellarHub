@@ -1,36 +1,243 @@
+/* ==========================================================================
+   MODO FULLSCREEN (ESTILO CONSOLA PREMIUM)
+   ========================================================================== */
+
 .theme-fullscreen {
-  --bg-color: #000;
+  background-color: var(--surface);
+  /* Cambiado a tu variable oscura nativa */
+  position: relative;
+  overflow: hidden;
 }
 
-.fs-background {
-  flex: 1;
-  overflow: hidden;
-  width: 100%;
+/* Contenedor principal de contenidos */
+.fs-content {
   position: relative;
+  z-index: 2;
+  height: 100%;
+  width: 100%;
   display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* Degradado sutil de arriba a abajo para asentar la interfaz */
+  background: linear-gradient(to bottom, transparent 50%, rgb(0 0 0 / 0.4) 100%);
 }
+
+/* FONDO DINÁMICO */
+.fs-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100dvw;
+  height: 100dvh;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  filter: blur(40px) saturate(1.4);
+  opacity: 0.15;
+
+  /* CAMBIO: Transición suave para cuando cambie la opacidad */
+  transition: opacity 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.fs-background::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* Viñeta oscura para que el fondo no compita con las tarjetas */
+  background: radial-gradient(circle at center, transparent 20%, var(--surface) 80%);
+}
+
+.fs-bg-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.05);
+
+  /* CAMBIO: Animación cuando cambia la imagen de fondo */
+  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+
+/* HERO / SECCIÓN SUPERIOR */
+.fs-header {
+  width: 100%;
+  background-color: transparent;
+  height: 45dvh;
+  /* Altura controlada para dejar aire abajo */
+  position: relative;
+  mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+}
+
+/* HERO / BANNER DEL JUEGO */
 
 .fs-image {
-  object-fit: contain;
   width: 100%;
-  aspect-ratio: 96/31;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+
+  /* CAMBIO: Transición fluida para el cambio de Banner */
+  transition: filter 0.3s ease, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
+/* LOGO DEL JUEGO */
 .fs-logo {
-  width: 25lvw;
   position: absolute;
-  bottom: 0;
-  left: 0;
-  padding: 1rem;
-  margin: 10lvh 5lvw;
+  left: 5lvw;
+  bottom: 15%;
+  width: 22lvw;
+  max-width: 22lvw;
+  max-height: 25dvh;
+  filter: drop-shadow(0 8px 16px rgb(0 0 0 / 0.6));
+  object-fit: contain;
+
+  /* CAMBIO: Animación de entrada para el logo (escala + opacidad) */
+  transition:
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.4s ease;
 }
 
-.fs-grid {
-  height: fit-content;
+/* ==========================================================================
+   NUEVAS CLASES DE ANIMACIÓN (Se activan vía JavaScript al cambiar de juego)
+   ========================================================================== */
+
+/* Efecto de parpadeo/transición al cambiar de contenido */
+.fs-image-changing {
+  filter: brightness(0.3) blur(5px);
+  transform: scale(1.01);
+}
+
+.fs-logo-changing {
+  opacity: 0;
+  transform: translateY(15px) scale(0.95);
+}
+
+
+/* CATEGORÍAS */
+.fs-categories {
+  width: 100%;
+  height: auto;
   display: flex;
-  overflow-y: hidden;
+  padding: 1rem 0 0 5rem;
+  /* Alineado horizontalmente con el logo */
   gap: var(--gap);
-  padding: var(--padding);
 }
 
-.fs-grid .game-card {}
+.category-badge {
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 1rem;
+  gap: 0.5rem;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  /* Badges más redondeados y modernos */
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  /* Un tamaño más equilibrado que el xx-large */
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Si la categoría estuviera activa o hiciera juego con el juego seleccionado */
+.category-badge.active {
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface-elevated));
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.category-badge img {
+  height: 5dvh;
+  width: auto;
+  object-fit: contain;
+  filter: opacity(0.7);
+}
+
+
+/* GRID DE TARJETAS (El contenedor de Scroll) */
+.fs-grid {
+  flex: 1;
+  /* Ocupa todo el espacio inferior restante */
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 0;
+  /* Espacio vertical para permitir la expansión por escala */
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+
+  /* Ocultar barra de navegación nativa */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  /* Centrado perfecto de los extremos utilizando tu colchón de espacio */
+  scroll-padding: 0 50%;
+}
+
+/* TARJETAS DE JUEGO (GAME CARDS) */
+.fs-grid .game-card {
+  min-width: 12dvw;
+  /* Un poco más anchas para apreciar mejor el arte */
+  aspect-ratio: 2 / 3;
+  /* Relación de aspecto estándar de posters de videojuegos */
+  margin: 0 1rem;
+  /* Separación limpia entre tarjetas */
+  scroll-snap-align: center;
+  position: relative;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  background-color: var(--surface-elevated);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+
+  /* La clave del movimiento orgánico de consola: easing Out-Quint */
+  transition:
+    transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+
+  /* Nos aseguramos de que las imágenes internas hereden el comportamiento */
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+}
+
+/* ==========================================================================
+   ESTADO SELECCIONADO (Foco del Gamepad)
+   ========================================================================== */
+
+.fs-grid .game-card.selected {
+  transform: scale(1.18);
+  /* Crece notablemente rompiendo la línea plana */
+  border-color: var(--primary);
+  z-index: 10;
+  /* Se posiciona por encima de las tarjetas de los lados */
+
+  /* Brillo perimetral usando tu variable de color primaria dorada */
+  box-shadow:
+    0 12px 30px rgb(0 0 0 / 0.5),
+    0 0 20px color-mix(in srgb, var(--primary) 25%, transparent);
+
+  /* Zoom sutil al arte del juego dentro de la tarjeta seleccionada */
+  img {
+    transform: scale(1.05);
+  }
+}
+
+/* Efecto de pulsación rápida al presionar el botón "Aceptar" del mando */
+.fs-grid .game-card.selected:active {
+  transform: scale(1.12);
+  transition: transform 0.08s ease;
+}

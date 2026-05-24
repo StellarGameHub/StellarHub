@@ -1,15 +1,16 @@
 import { getSettings } from './settingsService';
 import { getGameData, getGameIdsByCategory, saveGame } from './libraryService';
-import { saveGameImage } from './imageService'; // usaremos la función existente
+import { saveGameImage } from './imageService';
 import { SteamGridImageType } from '../../shared/enums';
-import { backgroundTask, TaskType } from './backgroundTaskService';
+import { dispatchGamesUpdatedEvent, dispatchImagesUpdatedEvent } from '../utils/utils';
 
+// ====================================================================================
+// TYPES
+// ====================================================================================
 
-//We can import this from 'steamgriddb' cause is no ESM bla bla
 interface SGDBGame {
     id: number;
     name: string;
-
 }
 
 interface SGDBImage {
@@ -19,144 +20,291 @@ interface SGDBImage {
     score: number;
 }
 
+type ProgressCallback = (
+    current: number,
+    total: number,
+    message?: string
+) => void;
 
-// Configuración de la API
+// ====================================================================================
+// CONFIG
+// ====================================================================================
+
+const imageTypeMap = {
+    [SteamGridImageType.GRID]: 'grid',
+    [SteamGridImageType.WIDEGRID]: 'wideGrid',
+    [SteamGridImageType.HERO]: 'hero',
+    [SteamGridImageType.LOGO]: 'logo',
+    [SteamGridImageType.ICON]: 'icon'
+} as const;
+
 const STEAMGRIDDB_API = 'https://www.steamgriddb.com/api/v2';
+
 let apiKey: string | null = null;
 let sgdbClient: any | null = null;
+let clientPromise: Promise<any> | null = null;
 
-// Obtener API key desde settings (cacheada)
+// ====================================================================================
+// CLIENT
+// ====================================================================================
+
 async function getApiKey(): Promise<string | null> {
-    if (apiKey !== null) return apiKey;
+    if (apiKey !== null)
+        return apiKey;
+
     const settings = await getSettings();
+
     apiKey = settings.steamGridDB.apiKey || null;
+
     return apiKey;
 }
 
-// BuildClient
-async function prepareClient() {
-    if (sgdbClient) return;
-    const key = await getApiKey();
-    if (!key) throw new Error('SteamGridDB API key not configured');
-    // Dinamic import of ESM module
-    const SGDBModule = await import('steamgriddb');
-    const SGDB = SGDBModule.default;
-    sgdbClient = new SGDB(key);
+async function getClient() {
+    if (sgdbClient)
+        return sgdbClient;
+
+    if (!clientPromise) {
+        clientPromise = (async () => {
+
+            const key = await getApiKey();
+
+            if (!key)
+                throw new Error('SteamGridDB API key not configured');
+
+            const SGDBModule = await import('steamgriddb');
+            const SGDB = SGDBModule.default;
+
+            sgdbClient = new SGDB(key);
+
+            return sgdbClient;
+
+        })();
+    }
+
+    return clientPromise;
 }
 
-// Buscar juegos por nombre (y opcionalmente plataforma)
-export async function searchGameOnSteamGridDB(query: string): Promise<SGDBGame[] | undefined> {
-    if (!sgdbClient) await prepareClient();
-    const games = await sgdbClient?.searchGame(query);
-    return games;
+// ====================================================================================
+// SEARCH
+// ====================================================================================
+
+export async function searchGameOnSteamGridDB(
+    query: string
+): Promise<SGDBGame[]> {
+
+    const client = await getClient();
+
+    const games = await client.searchGame(query);
+
+    return games || [];
 }
 
-export async function getSGDBImagesByID(steamGridID: number, type: SteamGridImageType): Promise<SGDBImage[] | undefined> {
-    if (!sgdbClient) await prepareClient();
+function normalizeTitle(title: string): string {
+    return title
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+}
+
+function getBestGameMatch(
+    query: string,
+    results: SGDBGame[]
+): SGDBGame | null {
+
+    if (!results.length)
+        return null;
+
+    const normalizedQuery = normalizeTitle(query);
+
+    // Exact normalized match first
+    const exact = results.find(r =>
+        normalizeTitle(r.name) === normalizedQuery
+    );
+
+    if (exact)
+        return exact;
+
+    // Contains match
+    const contains = results.find(r =>
+        normalizeTitle(r.name).includes(normalizedQuery)
+    );
+
+    if (contains)
+        return contains;
+
+    return results[0];
+}
+
+// ====================================================================================
+// IMAGES
+// ====================================================================================
+
+export async function fetchSteamGridImages(
+    steamGridId: number,
+    type: SteamGridImageType
+): Promise<SGDBImage[]> {
+
+    const client = await getClient();
 
     switch (type) {
+
         case SteamGridImageType.GRID:
-            return sgdbClient?.getGrids({ type: 'game', id: steamGridID, dimensions: ["600x900"] });
+            return client.getGrids({
+                type: 'game',
+                id: steamGridId,
+                dimensions: ['600x900']
+            });
+
         case SteamGridImageType.WIDEGRID:
-            return sgdbClient?.getGrids({ type: 'game', id: steamGridID, dimensions: ["460x215", "920x430"] });
+            return client.getGrids({
+                type: 'game',
+                id: steamGridId,
+                dimensions: ['460x215', '920x430']
+            });
+
         case SteamGridImageType.HERO:
-            return sgdbClient?.getHeroesById(steamGridID);
+            return client.getHeroesById(steamGridId);
+
         case SteamGridImageType.LOGO:
-            return sgdbClient?.getLogosById(steamGridID);
+            return client.getLogosById(steamGridId);
+
         case SteamGridImageType.ICON:
-            return sgdbClient?.getIconsById(steamGridID);
-        default: return undefined;
-    }
+            return client.getIconsById(steamGridId);
 
+        default:
+            return [];
+    }
 }
 
-// Obtener imágenes de un juego específico por su ID de SteamGridDB
-export async function getGameImagesFromSteamGridDB(steamGridId: number, types: SteamGridImageType[]): Promise<SGDBImage[]> {
-    const images: SGDBImage[] = [];
-    for (const type of types) {
+export async function getBestImageForType(
+    steamGridId: number,
+    type: SteamGridImageType
+): Promise<SGDBImage | null> {
 
-        const sgdbImages = await getSGDBImagesByID(steamGridId, type);
-        if (!sgdbImages) continue;
+    const images = await fetchSteamGridImages(steamGridId, type);
 
-        images.push(...sgdbImages);
-    }
-    //Sort by Score
-    images.sort((a, b) => b.score - a.score)
-    return images.sort();
+    if (!images.length)
+        return null;
+
+    const sorted = images.sort((a, b) => b.score - a.score);
+
+    return sorted.find(img => !img.tags?.includes('nsfw'))
+        || sorted[0];
 }
 
-// Descargar una imagen desde URL y guardarla usando imageService
-async function downloadAndSaveImage(url: URL, gameId: string, type: SteamGridImageType, ext?: string): Promise<string> {
+// ====================================================================================
+// DOWNLOAD
+// ====================================================================================
+
+async function downloadAndSaveImage(
+    url: URL,
+    gameId: string,
+    type: SteamGridImageType,
+    ext?: string
+): Promise<string> {
+
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`Failed to download image: ${response.statusText}`);
+
+    if (!response.ok)
+        throw new Error(`Failed to download image: ${response.statusText}`);
+
     const buffer = await response.arrayBuffer();
+
     const contentType = response.headers.get('content-type') || '';
+
     let imageExt = ext;
+
     if (!imageExt) {
-        if (contentType.includes('jpeg') || contentType.includes('jpg')) imageExt = 'jpg';
-        else if (contentType.includes('png')) imageExt = 'png';
-        else if (contentType.includes('webp')) imageExt = 'webp';
-        else imageExt = 'png';
+
+        if (contentType.includes('jpeg') || contentType.includes('jpg'))
+            imageExt = 'jpg';
+
+        else if (contentType.includes('png'))
+            imageExt = 'png';
+
+        else if (contentType.includes('webp'))
+            imageExt = 'webp';
+
+        else
+            imageExt = 'png';
     }
-    return saveGameImage(gameId, new Uint8Array(buffer), imageExt, type);
+
+    return saveGameImage(
+        gameId,
+        new Uint8Array(buffer),
+        imageExt,
+        type
+    );
 }
 
-// Función principal: buscar y descargar la mejor imagen para un juego
-export async function fetchAndAssignGameImage(gameId: string, imageType: SteamGridImageType): Promise<boolean> {
-    try {
-        const game = await getGameData(gameId);
-        if (!game) throw new Error(`Game ${gameId} not found`);
+// ====================================================================================
+// GAME IMAGE HELPERS
+// ====================================================================================
 
-        // 1. Buscar juego en SteamGridDB
-        const searchResults = await searchGameOnSteamGridDB(game.title);
-        if (!searchResults || !searchResults.length) {
-            console.warn(`No SteamGridDB results for ${game.title}`);
-            return false;
-        }
-        const bestMatch = searchResults[0]; // primer resultado
-        // 2. Obtener imágenes del tipo deseado
-        const images = await getGameImagesFromSteamGridDB(bestMatch.id, [imageType]);
-        if (!images.length) {
-            console.warn(`No ${imageType} images found for ${game.title}`);
-            return false;
-        }
-        // 3. Elegir la primera imagen no NSFW (si hay, sino la primera)
-        const image = images.find(img => !img.tags?.includes('nsfw')) || images[0];
-        // 4. Descargar y guardar imagen
-        const savedPath = await downloadAndSaveImage(image.url, gameId, imageType);
-        // 5. Actualizar el objeto GameDetail
-        if (!game.gameImages) game.gameImages = { grid: undefined, hero: undefined, logo: undefined, icon: undefined, wideGrid: undefined };
+function ensureGameImages(game: any) {
 
-        switch (imageType) {
-            case SteamGridImageType.GRID:
-                game.gameImages.grid = savedPath;
-            case SteamGridImageType.WIDEGRID:
-                game.gameImages.wideGrid = savedPath;
-            case SteamGridImageType.HERO:
-                game.gameImages.hero = savedPath;
-            case SteamGridImageType.LOGO:
-                game.gameImages.logo = savedPath;
-            case SteamGridImageType.ICON:
-                game.gameImages.icon = savedPath;
-        }
+    if (!game.gameImages)
+        game.gameImages = {};
+}
 
-        await saveGame(game);
-        console.log(`Image ${imageType} saved for ${game.title}`);
-        return true;
-    } catch (err) {
-        console.error(`Error fetching image for ${gameId}:`, err);
+function assignImageToGame(
+    game: any,
+    type: SteamGridImageType,
+    path: string
+) {
+
+    ensureGameImages(game);
+
+    const key = imageTypeMap[type];
+
+    game.gameImages[key] = path;
+}
+
+function hasImage(
+    game: any,
+    type: SteamGridImageType
+): boolean {
+
+    if (!game.gameImages)
         return false;
-    }
 
+    const key = imageTypeMap[type];
+
+    return game.gameImages[key] != null;
 }
 
+// ====================================================================================
+// MAIN
+// ====================================================================================
 
-/** 
- * Update all images of one Game
- * @param gameId GameID 
- * @param imageTypes Array with the imageType to update (all by default)
- * @returns Promise<boolean> true if al least one image has ben updated
- */
+async function fetchAndAssignSingleImage(
+    game: any,
+    steamGridId: number,
+    type: SteamGridImageType,
+    onlyMissing = false
+): Promise<boolean> {
+
+    if (onlyMissing && hasImage(game, type))
+        return false;
+
+    const image = await getBestImageForType(
+        steamGridId,
+        type
+    );
+
+    if (!image)
+        return false;
+
+    const savedPath = await downloadAndSaveImage(
+        image.url,
+        game.id,
+        type
+    );
+
+    assignImageToGame(game, type, savedPath);
+
+    return true;
+}
+
 export async function fetchAllGameImages(
     gameId: string,
     imageTypes: SteamGridImageType[] = [
@@ -166,128 +314,201 @@ export async function fetchAllGameImages(
         SteamGridImageType.LOGO,
         SteamGridImageType.ICON
     ],
-    onlyMissing: boolean = false
+    onlyMissing = false,
+    onProgress?: (
+        current: number,
+        total: number,
+        message?: string
+    ) => void
 ): Promise<boolean> {
+
     try {
+
         const game = await getGameData(gameId);
-        if (!game) throw new Error(`Game ${gameId} not found`);
 
-        const backgroundTaskId = backgroundTask.startTask(`Downloading images for ${game.title}...`, TaskType.DownloadImages);
+        if (!game)
+            throw new Error(`Game ${gameId} not found`);
 
-        // Search game on SGDB
-        const searchResults = await searchGameOnSteamGridDB(game.title);
-        if (!searchResults?.length) {
+        const searchResults = await searchGameOnSteamGridDB(
+            game.title
+        );
+
+        const bestMatch = getBestGameMatch(
+            game.title,
+            searchResults
+        );
+
+        if (!bestMatch) {
             console.warn(`No SteamGridDB results for ${game.title}`);
             return false;
         }
-        const bestMatch = searchResults[0];
+
         let anySuccess = false;
 
-        // Get best non NSFW (Go to horny jail) image
-        for (const type of imageTypes) {
-            backgroundTask.updateProgress(backgroundTaskId, `Downloading ${SteamGridImageType[type]} for ${game.title}...`)
-            const images = await getGameImagesFromSteamGridDB(bestMatch.id, [type]);
-            if (!images.length) continue;
-            const image = images.find(img => !img.tags?.includes('nsfw')) || images[0];
-            const savedPath = await downloadAndSaveImage(image.url, gameId, type);
-            // Actualizar el objeto GameDetail según el tipo
-            if (!game.gameImages) game.gameImages = {};
-            switch (type) {
-                case SteamGridImageType.GRID:
-                    if (onlyMissing && game.gameImages.grid != null) continue;
-                    game.gameImages.grid = savedPath;
-                    break;
-                case SteamGridImageType.WIDEGRID:
-                    if (onlyMissing && game.gameImages.grid != null) continue;
-                    game.gameImages.wideGrid = savedPath;
-                    break;
-                case SteamGridImageType.HERO:
-                    if (onlyMissing && game.gameImages.grid != null) continue;
-                    game.gameImages.hero = savedPath;
-                    break;
-                case SteamGridImageType.LOGO:
-                    if (onlyMissing && game.gameImages.grid != null) continue;
-                    game.gameImages.logo = savedPath;
-                    break;
-                case SteamGridImageType.ICON:
-                    if (onlyMissing && game.gameImages.grid != null) continue;
-                    game.gameImages.icon = savedPath;
-                    break;
+        for (let i = 0; i < imageTypes.length; i++) {
+
+            const type = imageTypes[i];
+
+            onProgress?.(
+                i + 1,
+                imageTypes.length,
+                `Downloading ${SteamGridImageType[type]} for ${game.title}`
+            );
+
+            try {
+
+                const success = await fetchAndAssignSingleImage(
+                    game,
+                    bestMatch.id,
+                    type,
+                    onlyMissing
+                );
+
+                if (success) {
+                    anySuccess = true;
+
+                    console.log(
+                        `Downloaded ${SteamGridImageType[type]} for ${game.title}`
+                    );
+                }
+
+            } catch (err) {
+
+                console.error(
+                    `Failed downloading ${SteamGridImageType[type]} for ${game.title}`,
+                    err
+                );
             }
-            anySuccess = true;
-            console.log(`Image ${type} saved for ${game.title}`);
         }
 
         if (anySuccess) {
-            backgroundTask.completeTask(backgroundTaskId, `Images downloaded for ${game.title}`);
+
             await saveGame(game);
+            dispatchImagesUpdatedEvent();
         }
+
         return anySuccess;
+
     } catch (err) {
-        console.error(`Error fetching all images for game with id ${gameId}:`, err);
+
+        console.error(
+            `Error fetching images for game ${gameId}`,
+            err
+        );
+
         return false;
     }
 }
 
-/**
- * Update multiple game's images. For game scans, etc.
- * @param gameIds Array with game IDs
- * @param imageTypes Array with the imageType to update (all by default)
- * @param onProgress Callback for progress report (updated, total)
- * @returns How many games where succesfully updated
- */
+// ====================================================================================
+// BULK
+// ====================================================================================
+
 export async function fetchImagesForGameList(
     gameIds: string[],
     imageTypes?: SteamGridImageType[],
-    onProgress?: (current: number, total: number) => void
+    onProgress?: ProgressCallback
 ): Promise<{ success: number; failed: number }> {
+
     let success = 0;
     let failed = 0;
+
     const total = gameIds.length;
 
-    const backgroundTaskId = backgroundTask.startTask(`Downloading images for ${total} games...`, TaskType.DownloadImages);
-
     for (let i = 0; i < total; i++) {
+
         const gameId = gameIds[i];
+
         const game = await getGameData(gameId);
 
-        backgroundTask.updateProgress(`${total - (i + 1)} images remaining`, ((i * 100) / total).toString());
+        const title = game?.title || gameId;
 
-        if (!game) {
+        onProgress?.(
+            i + 1,
+            total,
+            `Processing ${title}`
+        );
+
+        try {
+
+            const ok = await fetchAllGameImages(
+                gameId,
+                imageTypes
+            );
+
+            if (ok)
+                success++;
+            else
+                failed++;
+
+        } catch {
+
             failed++;
-            continue;
         }
-        const ok = await fetchAllGameImages(gameId, imageTypes);
-        if (ok) success++;
-        else failed++;
-        if (onProgress) onProgress(i + 1, total);
     }
-    backgroundTask.completeTask(backgroundTaskId, `Finished downloading images for ${total} games`);
+
     return { success, failed };
 }
 
-// En imageFetcherService.ts
 export async function fetchImagesForCategories(
     categoryIds: string[],
     imageTypes?: SteamGridImageType[],
-    onProgress?: (current: number, total: number, gameTitle: string) => void
+    onProgress?: (
+        current: number,
+        total: number,
+        gameTitle: string
+    ) => void
 ): Promise<{ success: number; failed: number }> {
-    const gameIds = await getGameIdsByCategory(categoryIds);
-    if (!gameIds.length) return { success: 0, failed: 0 };
+
+    const gameIds = await getGameIdsByCategory(
+        categoryIds
+    );
+
+    if (!gameIds.length)
+        return {
+            success: 0,
+            failed: 0
+        };
+
     let success = 0;
     let failed = 0;
+
     const total = gameIds.length;
+
     for (let i = 0; i < total; i++) {
+
         const gameId = gameIds[i];
+
         const game = await getGameData(gameId);
+
         if (!game) {
             failed++;
             continue;
         }
-        const ok = await fetchAllGameImages(gameId, imageTypes);
-        if (ok) success++;
-        else failed++;
-        if (onProgress) onProgress(i + 1, total, game.title);
+
+        onProgress?.(
+            i + 1,
+            total,
+            game.title
+        );
+
+        try {
+
+            const ok = await fetchAllGameImages(
+                gameId,
+                imageTypes
+            );
+
+            if (ok)
+                success++;
+            else
+                failed++;
+
+        } catch {
+
+            failed++;
+        }
     }
+
     return { success, failed };
 }

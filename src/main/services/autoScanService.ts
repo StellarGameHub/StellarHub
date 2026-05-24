@@ -1,13 +1,16 @@
 import { getSettings } from './settingsService';
 import { scanInstalledSteamGames } from './steamLocalScanner';
-import { getScanConfigs, runScan } from './romScannerService'; // we need runScan from romScannerService
-import { addSteamGame, getGames, saveGames } from './libraryService';
+import { getScanConfigs, runRomsScan } from './romScannerService'; // we need runScan from romScannerService
+import { addSteamGame, getGames, isGameBlocked, saveGames } from './libraryService';
 import { GameSource } from '../../shared/enums';
 import fs from 'fs/promises';
 
 import { fetchOwnedGames, SteamOwnedGame } from './steamApiService';
 import { Game, ExecutableGame, SteamGame } from '../../shared/types';
 import { fetchImagesForGameList } from './imageFetcher';
+import { BrowserWindow } from 'electron';
+import { dispatchGamesUpdatedEvent } from "../utils/utils";
+import { backgroundTask, TaskType } from './backgroundTaskService';
 
 /**
  * Sincroniza la biblioteca de Steam del usuario con la base de datos local.
@@ -16,7 +19,7 @@ import { fetchImagesForGameList } from './imageFetcher';
  * - No modifica el flag 'isInstalled' (eso lo hace el escaneo local de manifiestos).
  */
 export async function syncSteamLibrary(): Promise<{ added: number; updated: number }> {
-    const settings = await getSettings();    
+    const settings = await getSettings();
 
     if (!settings.steam.apiKey || !settings.steam.clientId) {
         console.log('[SteamSync] No se puede sincronizar: falta API Key o Steam ID');
@@ -52,6 +55,13 @@ export async function syncSteamLibrary(): Promise<{ added: number; updated: numb
                 playtimeMinutes: steamGame.playtime_forever,
                 gameImages: { grid: '', hero: '', logo: '', wideGrid: '' },
             };
+
+
+            if (await isGameBlocked((newGame as Game))) {
+                console.log(`[AutoScan] Juego bloqueado, omitiendo: ${newGame.title}`);
+                continue;
+            }
+
             localGames.push(newGame as SteamGame);
             newGames.push(newGame as SteamGame);
             added++;
@@ -71,7 +81,42 @@ export async function syncSteamLibrary(): Promise<{ added: number; updated: numb
 
     if (added > 0 || updated > 0) {
         await saveGames(localGames);
-        fetchImagesForGameList(newGames.map(g => g.id))
+
+
+        const backgroundTaskId = backgroundTask.startTask(
+            `Downloading images...`,
+            TaskType.DownloadImages
+        );
+
+        try {
+            const result = await fetchImagesForGameList(
+                newGames.map(g => g.id),
+                undefined,
+                (current, total, message) => {
+
+                    backgroundTask.updateProgress(
+                        backgroundTaskId,
+                        message || 'Downloading...',
+                        Math.round((current / total) * 100)
+                    );
+                }
+            );
+
+            backgroundTask.completeTask(
+                backgroundTaskId,
+                `Downloaded images for ${result.success} games`
+            );
+
+        } catch (err) {
+
+            backgroundTask.failTask(
+                backgroundTaskId,
+                'Failed downloading images',
+                String(err)
+            );
+        }
+
+
         console.log(`[SteamSync] Añadidos: ${added}, actualizados: ${updated}`);
     } else {
         console.log('[SteamSync] No se detectaron cambios');
@@ -102,6 +147,7 @@ export async function runAutoScans() {
                 }
             }
             console.log(`[AutoScan] Steam local scan complete: ${added} new games found.`);
+            dispatchGamesUpdatedEvent();
         } catch (err) {
             console.error('[AutoScan] Steam local scan failed:', err);
         }
@@ -117,20 +163,20 @@ export async function runAutoScans() {
     }
 
     // 2. ROM scans
-    // if (settings.autoScanRoms !== false) {
-    //     try {
-    //         const scanConfigs = await getScanConfigs();
-    //         for (const config of scanConfigs) {
-    //             if (config.enabled) {
-    //                 console.log(`[AutoScan] Running ROM scan for ${config.systemName}...`);
-    //                 const result = await runScan(config);
-    //                 console.log(`[AutoScan] ROM scan for ${config.systemName}: added ${result.added}, removed ${result.removed}`);
-    //             }
-    //         }
-    //     } catch (err) {
-    //         console.error('[AutoScan] ROM scans failed:', err);
-    //     }
-    // }
+    if (settings.autoScanRoms !== false) {
+        try {
+            const scanConfigs = await getScanConfigs();
+            for (const config of scanConfigs) {
+                if (config.enabled) {
+                    console.log(`[AutoScan] Running ROM scan for ${config.systemName}...`);
+                    const result = await runRomsScan(config);
+                    console.log(`[AutoScan] ROM scan for ${config.systemName}: added ${result.added}, removed ${result.removed}`);
+                }
+            }
+        } catch (err) {
+            console.error('[AutoScan] ROM scans failed:', err);
+        }
+    }
 
     // 3. Manual games installation check
     // if (settings.autoCheckManualGames !== false) {

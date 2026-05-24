@@ -3,6 +3,7 @@ import { GameCompletionStatus, GameSource, SteamGridImageType } from "./enums";
 export interface AppSettings {
   launchInFullscreen: boolean;
   defaultWinePrefix?: string;
+  autoScanRoms: boolean;
   steamGridDB: {
     enabled: boolean;
     apiKey?: string;
@@ -140,3 +141,8 @@ export function toGameSummary(game: Game): GameSummary {
   };
 }
 
+export interface BlacklistData {
+  steam: number[];      // Steam App IDs
+  rom: string[];        // Rutas absolutas de ROMs
+  manual: string[];     // Game IDs manuales
+}

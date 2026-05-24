@@ -27,15 +27,18 @@ function createWindow() {
   //Hide Browser Menu
   win.setMenu(null);
 
-
   // En desarrollo, carga el servidor de Vite
   if (process.env.NODE_ENV === 'development') {
     win.loadURL('http://localhost:3000');
     win.webContents.openDevTools();
+
+    // console.log("Lanzando en modo test")
+    // app.setPath('userData', app.getPath('userData') + '-test');
   } else {
     win.loadFile(path.join(__dirname, '../renderer/index.html'));
   }
 }
+
 
 app.whenReady().then(() => {
   console.log('⚡ Backend iniciado correctamente');
@@ -71,4 +74,18 @@ app.on('window-all-closed', () => {
 
 ipcMain.on('app-quit', () => {
   app.quit();
+});
+
+ipcMain.handle('is-maximized', () => {
+  const win = BrowserWindow.getFocusedWindow();
+  return win?.isMaximized() ?? false;
+});
+
+ipcMain.handle('toggle-maximize', () => {
+  const win = BrowserWindow.getFocusedWindow();
+  if (win?.isMaximized()) {
+    win.unmaximize();
+  } else {
+    win?.maximize();
+  }
 });

@@ -211,7 +211,9 @@ export class GameCard extends HTMLElement {
         this.setAttribute('data-game-id', game.id);
         this.setAttribute('data-game-title', game.title);
 
+        ///===============
         ///GUARDAR FILTROS
+        ///===============
 
         switch (game.source) {
             case GameSource.MANUAL:
@@ -225,7 +227,10 @@ export class GameCard extends HTMLElement {
                 break;
         }
 
+        this.filters.push(game.isInstalled ? "gs-installed" : "gs-uninstalled")
 
+
+        ///===============
         // Title
         const title =
             this.querySelector('.game-title');
@@ -258,7 +263,7 @@ export class GameCard extends HTMLElement {
 
             case GameCardStyle.PORTRAIT:
 
-                img.src = game.gameImages.grid
+                img.src = game.gameImages?.grid
                     ? `stellarhub://${game.gameImages.grid}`
                     : '/assets/default-cover.png';
 
@@ -266,7 +271,7 @@ export class GameCard extends HTMLElement {
 
             case GameCardStyle.WIDE:
 
-                img.src = game.gameImages.wideGrid
+                img.src = game.gameImages?.wideGrid
                     ? `stellarhub://${game.gameImages.wideGrid}`
                     : '/assets/default-cover.png';
 
@@ -274,7 +279,7 @@ export class GameCard extends HTMLElement {
 
             case GameCardStyle.LIST:
 
-                img.src = game.gameImages.icon
+                img.src = game.gameImages?.icon
                     ? `stellarhub://${game.gameImages.icon}`
                     : '/assets/default-cover.png';
 

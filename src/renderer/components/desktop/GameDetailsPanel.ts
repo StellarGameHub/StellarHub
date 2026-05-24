@@ -85,12 +85,15 @@ export class GameDetailsPanel extends HTMLElement {
         deleteButton?.addEventListener("click", async (e) => {
             e.stopPropagation();
 
-            const result = await window.electronAPI.invoke("delete-game-by-id", this.gameId)
-            if (result.success) {
-                window.dispatchEvent(new CustomEvent('games-updated'));
-            }
 
-            this.updatePanel();
+            this.dispatchEvent(new CustomEvent('open-remove-game-modal', {
+                bubbles: true,
+                composed: true,
+                detail: this.gameId
+            }));
+
+            console.log("Evento de Abrir Modal Remove disparado!")
+            // this.updatePanel();
         })
 
         // Install Button
@@ -103,6 +106,11 @@ export class GameDetailsPanel extends HTMLElement {
                 this.updatePanel()
             }
         })
+
+        document.addEventListener('games-updated', async () => {
+            console.log("Escuchando Evento: 'games-updated'")
+            await this.updatePanel();
+        });
 
         // CONFIG MENU DROPDOWN
 
@@ -173,7 +181,14 @@ export class GameDetailsPanel extends HTMLElement {
         if (spanPublisher && game.publishers) spanPublisher.textContent = game?.publishers?.concat().toString();
 
         const spanDate = this.querySelector("#gdp-span-date") as HTMLElement;
-        if (spanDate && game.releaseDate) spanDate.textContent = game?.releaseDate.toDateString();
+        if (spanDate && game.releaseDate) {
+
+            const releaseDate = new Date(game.releaseDate);
+
+            spanDate.textContent = isNaN(releaseDate.getTime())
+                ? "Fecha desconocida"
+                : releaseDate.toDateString();
+        }
 
         const spanGenres = this.querySelector("#gdp-span-genres") as HTMLElement;
         if (spanGenres && game.genres) spanGenres.textContent = game?.genres.concat().toString();

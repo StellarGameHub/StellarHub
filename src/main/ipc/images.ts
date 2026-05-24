@@ -2,7 +2,7 @@
 import { ipcMain } from 'electron';
 import { SteamGridImageType } from '../../shared/enums';
 import { getGameData, saveGame } from '../services/libraryService';
-import { fetchAllGameImages, fetchAndAssignGameImage, fetchImagesForCategories, fetchImagesForGameList } from '../services/imageFetcher';
+import { fetchAllGameImages, fetchImagesForCategories, fetchImagesForGameList } from '../services/imageFetcher';
 
 export function registerImageHandlers() {
 
@@ -17,11 +17,6 @@ export function registerImageHandlers() {
             await saveGame(game);
         }
         return { success: true };
-    });
-
-    ipcMain.handle('fetch-game-image', async (_, gameId: string, imageType: SteamGridImageType) => {
-        const success = await fetchAndAssignGameImage(gameId, imageType);
-        return { success };
     });
 
     // ipc/images.ts
