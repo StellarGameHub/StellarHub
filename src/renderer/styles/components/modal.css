@@ -1,3 +1,7 @@
+/* ==========================================================================
+   Dialog
+   ========================================================================== */
+
 dialog {
     border: none;
     padding: 0;
@@ -8,194 +12,344 @@ dialog {
 dialog[open] {
     position: fixed;
     inset: 0;
-    width: 100vw;
-    height: 100vh;
+
+    width: 100dvw;
+    height: 100dvh;
 
     display: flex;
     justify-content: center;
     align-items: center;
 
     background: transparent;
-}
 
+    overflow: hidden;
+}
 
 dialog::backdrop {
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(2px);
 }
 
-.path-selector {
-    width: 100%;
-    display: flex;
-    gap: var(--gap);
-}
 
-.path-selector>input {
-    flex-grow: 1;
-}
-
-/* Contenido del modal */
-.modal-content {
-    background: var(--surface-background);
-    color: var(--text-color);
-    width: 100%;
-    max-width: 600px;
-    padding: var(--padding);
-    border-radius: var(--border-radius);
-    gap: var(--gap);
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: column;
-    gap: var(--gap);
-    box-shadow: var(--shadow-md);
-}
+/* ==========================================================================
+   Modal Container
+   ========================================================================== */
 
 .modal-form-container {
-    width: 100%;
+    width: 35dvw;
+    min-width: 650px;
+    max-height: 90dvh;
+
+    display: flex;
+    flex-direction: column;
+
+    background: var(--surface-background);
+    color: var(--text-color);
+
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+
+    overflow: hidden;
+}
+
+.modal-form-container h2,
+.modal-form-container h3 {
+    margin: 0;
 }
 
 
-.modal-content form {
+/* ==========================================================================
+   Form Layout
+   ========================================================================== */
+
+.modal-form-container form {
+    display: flex;
+    flex-direction: column;
+
+    height: 100%;
+    min-height: 0;
+}
+
+
+.form-title {
+    background: var(--surface-background);
+    border-bottom: 1px solid var(--border-color);
+    padding: var(--padding);
+
+}
+
+.form-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+
+    flex-grow: 1;
+    min-height: 1px;
+
+    padding: var(--padding);
+
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.form-buttons {
+    height: fit-content;
+
+    padding: var(--padding);
+    border-top: 1px solid var(--border-color);
+
+    background: var(--surface-background);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--gap);
+}
+
+
+/* ==========================================================================
+   Form Groups
+   ========================================================================== */
+
+.modal-form-container .form-group {
     display: flex;
     flex-direction: column;
     gap: var(--gap);
 }
 
-.modal-content .form-group {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 calc(50% - 0.5rem);
-    gap: var(--gap);
-}
-
-.modal-content label {
+.modal-form-container label {
     font-weight: bold;
     margin-top: 0.5rem;
 }
 
-.modal-content input,
-.modal-content select,
-.modal-content textarea {
+
+/* ==========================================================================
+   Inputs
+   ========================================================================== */
+
+.modal-form-container input,
+.modal-form-container select,
+.modal-form-container textarea {
+    width: 100%;
+
     padding: var(--padding);
-    border-radius: var(--border-radius);
+
     border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+
     background: var(--surface-elevated);
     color: var(--text-color);
 
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
-.modal-content input::placeholder,
-.modal-content select::placeholder,
-.modal-content textarea::placeholder {
+.modal-form-container input::placeholder,
+.modal-form-container textarea::placeholder {
     color: var(--text-muted);
 }
 
-.modal-content input:hover,
-.modal-content select:hover,
-.modal-content textarea:hover {
+.modal-form-container input:hover,
+.modal-form-container select:hover,
+.modal-form-container textarea:hover {
     background: var(--surface-elevated-hover);
 }
 
-.modal-content input:focus,
-.modal-content select:focus,
-.modal-content textarea:focus {
+.modal-form-container input:focus,
+.modal-form-container select:focus,
+.modal-form-container textarea:focus {
     outline: none;
+
     border-color: var(--secondary);
-    box-shadow: 0 0 0 3px rgb(77 163 255 / 0.15);
+
+    box-shadow: var(--shadow-md);
 }
 
-.modal-buttons {
+.modal-form-container textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* ==========================================================================
+   Checkbox / Radio Labels
+   ========================================================================== */
+
+.checkbox-label,
+.radio-label {
     display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    margin-top: 1rem;
+    align-items: center;
+    gap: 0.5rem;
+
+    cursor: pointer;
 }
 
-
-
-
+.checkbox-label input,
+.radio-label input {
+    width: auto;
+    margin: 0;
+}
 
 
 /* ==========================================================================
-   Modal List Items
+   Path Selector
+   ========================================================================== */
+
+.path-selector {
+    display: flex;
+    align-items: center;
+    gap: var(--gap);
+
+    width: 100%;
+}
+
+.path-selector>input {
+    flex: 1;
+}
+
+
+/* ==========================================================================
+   Modal List
    ========================================================================== */
 
 .modal-list {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+
     padding: 0;
     margin: 0;
 }
 
-/* Individual list item */
+
+/* ==========================================================================
+   Modal List Item
+   ========================================================================== */
+
 .modal-list-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     padding: 0.75rem 1rem;
 
     background: var(--surface-background);
+
     border: 1px solid var(--primary);
     border-radius: var(--border-radius);
 
-    /* Smooth hover transitions */
     transition:
         background 0.2s ease,
         border-color 0.2s ease,
-        transform 0.2s ease;
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
-/* Subtle lift and highlight on hover */
-.modal-list-item:hover {
+/* .modal-list-item:hover {
     background: var(--surface-elevated);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
 
-/* Grouping the icon and name */
+    transform: translateY(-2px);
+
+    box-shadow: var(--shadow-md);
+} */
+
+
+/* ==========================================================================
+   List Item Info
+   ========================================================================== */
+
 .list-item-info {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
 
-/* Styling the image */
 .list-item-icon {
     width: 128px;
     height: 32px;
+
     padding: 0 var(--padding);
+
     object-fit: contain;
+
     border-radius: 6px;
+
     background: var(--bg-color);
-    /* Fallback background for transparent PNGs */
 }
 
 .list-item-name {
-    font-weight: 500;
     font-size: 1rem;
+    font-weight: 500;
+
     color: var(--text-color);
 }
 
-/* Minimalist danger button */
+
+/* ==========================================================================
+   Remove Button
+   ========================================================================== */
+
 .remove-item-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     padding: 0.5rem;
-    background: transparent;
-    color: var(--text-muted);
+
     border: none;
     border-radius: 6px;
+
+    background: transparent;
+    color: var(--text-muted);
+
     cursor: pointer;
+
     font-size: 1.1rem;
 
-    transition: color 0.2s ease, background 0.2s ease;
+    transition:
+        color 0.2s ease,
+        background 0.2s ease;
 }
 
-/* Reveal danger colors only on hover to keep the UI clean */
 .remove-item-btn:hover {
-    color: #ef4444;
-    /* Bootstrap danger red */
+    color: var(--danger-hover);
     background: rgba(239, 68, 68, 0.1);
+}
+
+
+/* ==========================================================================
+   Image Fields (For Edit Game Modal)
+   ========================================================================== */
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+
+    /* importante */
+    grid-auto-flow: dense;
+}
+
+.image-field {
+    background: var(--surface-elevated);
+    border-radius: var(--border-radius);
+    padding: var(--padding);
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    justify-content: space-between;
+
+}
+
+/* el grande */
+.image-field.tall {
+    grid-row: span 2;
+}
+
+.image-field.wide {
+    grid-column: span 2;
+}
+
+.image-preview {
+    width: 100%;
+    object-fit: contain;
+    border-radius: var(--border-radius);
 }

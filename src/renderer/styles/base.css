@@ -256,6 +256,7 @@ li {
   justify-content: space-between;
   gap: var(--gap);
 }
+
 .checkbox>input {
   width: 16px;
 }
@@ -404,4 +405,22 @@ img {
 /*Hidde images with no src*/
 img[src=""] {
   visibility: hidden;
+}
+
+/*INPUT TYPE FILE*/
+input[type="file"]::file-selector-button {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease-in-out;
+  background: var(--primary);
+  color: var(--text-accent);
+  border: 1px solid var(--border-color);
+}
+
+input[type="file"]::file-selector-button:hover {
+  background: var(--primary-hover);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--primary) 35%, transparent)
 }

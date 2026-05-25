@@ -107,22 +107,27 @@ export class GameDetailsPanel extends HTMLElement {
             }
         })
 
+        // Edit Button
+        const editButton = this.querySelector("#btn-gdp-edit") as HTMLButtonElement;
+        editButton?.addEventListener("click", async (e) => {
+            e.stopPropagation();
+
+            this.dispatchEvent(new CustomEvent('open-edit-game-modal', {
+                bubbles: true,
+                composed: true,
+                detail: this.gameId
+            }));
+
+            console.log("Evento de Abrir Modal Edit disparado!")
+
+        })
+
+        //ESCUCHAR EL GAMES UPDATED
         document.addEventListener('games-updated', async () => {
             console.log("Escuchando Evento: 'games-updated'")
             await this.updatePanel();
         });
 
-        // CONFIG MENU DROPDOWN
-
-        //NOW IS USING HTML POPOVER, 
-
-        // const menuButton = this.querySelector("#btn-gdp-menu") as HTMLButtonElement;
-        // menuButton?.addEventListener("click", (e) => {
-        //     e.stopPropagation();
-
-        //     const dropdownElement = menuButton.closest('.dropdown')
-        //     if (dropdownElement) dropdownElement.querySelector(".dropdown-content")?.classList.toggle('open');
-        // });
     }
 
     private render() {

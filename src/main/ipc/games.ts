@@ -1,8 +1,11 @@
-import { ipcMain } from 'electron';
-import { GameSource } from '../../shared/enums';
-import { ExecutableGame, RomGame, SteamGame } from '../../shared/types';
+import { app, ipcMain } from 'electron';
+import { GameSource, SteamGridImageType } from '../../shared/enums';
+import { ExecutableGame, GameImages, RomGame, SteamGame } from '../../shared/types';
 import { killGame, launchEmulator, launchManualGame, launchSteamGame } from '../services/gameLauncher';
 import { getGames, getGameData, saveGame, updatePlaytime, deleteGame, addManualGame, installGame } from '../services/libraryService';
+import { saveGameImage } from '../services/imageService';
+import path from 'path';
+import fs from 'fs/promises';
 
 
 export function registerGameHandlers() {
@@ -90,4 +93,65 @@ export function registerGameHandlers() {
         }
     });
 
+    ipcMain.handle('update-game', async (event, { gameId, updates, imageData, gameSource }) => {
+        const game = await getGameData(gameId);
+        if (!game) throw new Error('Game not found');
+
+        // Actualizar metadatos
+        game.title = updates.title ?? game.title;
+        game.description = updates.description ?? game.description;
+        game.developers = updates.developers ?? game.developers;
+        game.publishers = updates.publishers ?? game.publishers;
+        game.releaseDate = updates.releaseDate ?? game.releaseDate;
+        game.genres = updates.genres ?? game.genres;
+
+        switch (gameSource) {
+            case GameSource.MANUAL:
+                if (updates.launchConfig) {
+                    (game as ExecutableGame).launchConfig = { ...updates.launchConfig };
+                }
+                break;
+            case GameSource.ROM:
+                break;
+        }
+
+        // Guardar nuevas imágenes (si vienen como File)
+        for (const [imageTypeString, data] of Object.entries(imageData)) {
+            const imageData = (data as {
+                buffer: Uint8Array;
+                ext: string;
+            })
+
+            if (imageData && imageData.buffer && imageData.ext) {
+                let imageType: SteamGridImageType | null = null;
+                switch (imageTypeString) {
+                    case "gridImage":
+                        imageType = SteamGridImageType.GRID
+                        break;
+                    case "wideGridImage":
+                        imageType = SteamGridImageType.WIDEGRID
+                        break;
+                    case "heroImage":
+                        imageType = SteamGridImageType.HERO
+                        break;
+                    case "logoImage":
+                        imageType = SteamGridImageType.LOGO
+                        break;
+                    case "iconImage":
+                        imageType = SteamGridImageType.ICON
+                        break;
+                }
+                if (imageType == null) continue;
+
+                const buffer = Buffer.from(imageData.buffer);
+                const ext = imageData.ext;
+                const relativePath = await saveGameImage(gameId, buffer, ext, imageType);
+                game.gameImages[imageTypeString as keyof GameImages] = relativePath;
+
+            }
+        }
+
+        await saveGame(game);
+        return { success: true };
+    });
 }

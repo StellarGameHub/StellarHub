@@ -46,6 +46,14 @@ export async function saveGameImage(
         // Crear directorio si no existe (recursivo por si faltan 'images' también)
         await fs.mkdir(imagesDir, { recursive: true });
 
+        // Comprobar si existe imagen previa y eliminarla
+        const files = await fs.readdir(imagesDir);
+        for (const file of files) {
+            if (file.startsWith(gameId)) {
+                await fs.unlink(path.join(imagesDir, file));
+            }
+        }
+
         // Ruta relativa para guardar en la base de datos
         const fileName = `${gameId}.${imageExt}`;
         const relativePath = path.join('images', SteamGridImageType[imageType], fileName);

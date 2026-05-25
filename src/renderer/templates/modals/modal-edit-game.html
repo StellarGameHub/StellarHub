@@ -1,0 +1,154 @@
+<dialog id="edit-game-modal">
+
+    <div id="modal-form-container" class="modal-form-container">
+        <div id="modal-loading" style="text-align:center; padding:2rem;">
+            <div class="spinner"></div>
+        </div>
+        <form id="edit-game-form">
+            <div class="form-title">
+                <h2>Edit Game</h2>
+            </div>
+            <div class="form-content">
+                <div class="form-group">
+                    <label>Title:</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+
+                <section id="section-manual-game" class="display-none">
+
+                    <div class="form-group">
+                        <label>Game Path:</label>
+                        <div class="path-selector">
+                            <input type="text" id="executablePath" name="executablePath" readonly required>
+                            <button type="button" class="btn btn-secondary" id="btn-browse-game">
+                                <i class="bi bi-folder-fill"></i>
+                                Examine
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Proton Prefix Folder:</label>
+                        <div class="path-selector">
+                            <input type="text" id="wine-prefix" name="winePrefix"
+                                placeholder="~/Games/prefixes/my-game">
+                            <button type="button" class="btn btn-secondary" id="btn-browse-prefix">
+                                <i class="bi bi-folder-fill"></i>
+                                Examine
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Proton Version:</label>
+                        <select id="protonVersion" name="protonVersion"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Launch Arguments:</label>
+                        <input type="text" id="launchArgs" name="launchArgs" placeholder="">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Game Arguments:</label>
+                        <input type="text" id="gameArgs" name="gameArgs" placeholder="">
+                    </div>
+
+                    <div class="form-group">
+                        <label>MangoHud:</label>
+                        <select id="mangoHud" name="mangoHud">
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>GameMode:</label>
+                        <select id="gameMode" name="gameMode">
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                        </select>
+                    </div>
+                </section>
+
+                <section id="section-rom-game">
+
+                </section>
+
+                <h3>Game Data</h3>
+
+                <div class="form-group">
+                    <label>Developers (comma separated):</label>
+                    <input type="text" id="developer" name="developer">
+                </div>
+                <div class="form-group">
+                    <label>Publishers (comma separated):</label>
+                    <input type="text" id="publisher" name="publisher">
+                </div>
+                <div class="form-group">
+                    <label>Release Date:</label>
+                    <input type="date" id="releaseDate" name="releaseDate" step="1" min="1970" max="2090">
+                </div>
+                <div class="form-group">
+                    <label>Genres (comma separated):</label>
+                    <input type="text" id="genres" name="genres" placeholder="Action, RPG, Adventure">
+                </div>
+                <div class="form-group">
+                    <label>Description:</label>
+                    <textarea id="description" name="description" rows="4"></textarea>
+                </div>
+
+
+                <h4>Game Images</h4>
+                <div class="image-grid">
+                    <div class="image-field tall">
+                        <label>Grid (portrait)</label>
+                        <img id="preview-grid" class="image-preview" src="">
+                        <input type="file" name="gridImage" id="gridImageFile" accept="image/png,image/jpeg,image/webp">
+                        <!-- <button type="button" class="btn btn-sm btn-secondary clear-image"
+                            data-type="grid">Clear</button> -->
+                    </div>
+                    <div class="image-field wide">
+                        <label>Wide Grid</label>
+                        <img id="preview-widegrid" class="image-preview" src="">
+                        <input type="file" name="wideGridImage" id="wideGridImageFile" accept="image/png,image/jpeg,image/webp">
+                        <!-- <button type="button" class="btn btn-sm btn-secondary clear-image"
+                            data-type="widegrid">Clear</button> -->
+                    </div>
+                    <div class="image-field wide">
+                        <label>Hero</label>
+                        <img id="preview-hero" class="image-preview" src="">
+                        <input type="file" name="heroImage" id="heroImageFile" accept="image/png,image/jpeg,image/webp">
+                        <!-- <button type="button" class="btn btn-sm btn-secondary clear-image"
+                            data-type="hero">Clear</button> -->
+                    </div>
+                    <div class="image-field">
+                        <label>Logo</label>
+                        <img id="preview-logo" class="image-preview" src="">
+                        <input type="file" name="logoImage" id="logoImageFile" accept="image/png,image/jpeg,image/webp">
+                        <!-- <button type="button" class="btn btn-sm btn-secondary clear-image"
+                            data-type="logo">Clear</button> -->
+                    </div>
+                    <div class="image-field">
+                        <label>Icon</label>
+                        <img id="preview-icon" class="image-preview" src="">
+                        <input type="file" name="iconImage" id="iconImageFile" accept="image/png,image/jpeg,image/webp">
+                        <!-- <button type="button" class="btn btn-sm btn-secondary clear-image"
+                            data-type="icon">Clear</button> -->
+                    </div>
+                </div>
+            </div>
+            <div class="form-buttons">
+
+                <button type="button" class="btn btn-secondary" id="close-modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <div class="btn-content">Save</div>
+                    <div class="btn-spinner display-none">
+                        <span class="spinner-sm"></span>
+                    </div>
+                </button>
+
+            </div>
+        </form>
+    </div>
+</dialog>

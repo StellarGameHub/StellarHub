@@ -113,11 +113,11 @@ export class AddGameModal extends HTMLElement {
         const loadingDiv = this.dialog.querySelector('#modal-loading') as HTMLElement;
         const formContainer = this.dialog.querySelector('#modal-form-container') as HTMLElement;
         if (isLoading) {
-            loadingDiv.style.display = 'block';
+            loadingDiv.style.display = 'flex';
             formContainer.style.display = 'none';
         } else {
             loadingDiv.style.display = 'none';
-            formContainer.style.display = 'block';
+            formContainer.style.display = 'flex';
         }
     }
 

@@ -1,26 +1,28 @@
 <dialog>
-    <div class="modal-content">
-        <h3>Escaneo de ROMS</h3>
-        <div id="div-scan-manager-content">
-
+    <div class="modal-form-container">
+        <div class="form-title">
+            <h3>ROMs Sacn Manager</h3>
         </div>
-
-        <button class="btn btn-primary" id="btn-add-new-scan">+ Nuevo</button>
-        <button class="btn btn-secondary" id="btn-close-scan-manager">Cerrar</button>
+        <div class="form-content">
+            <div id="div-scan-manager-content"></div>
+        </div>
+        <div class="form-buttons">
+            <button class="btn btn-secondary" id="btn-close-scan-manager">Close</button>
+            <button class="btn btn-primary" id="btn-add-new-scan">New</button>
+        </div>
     </div>
 
-
     <template id="template-scan-config-item">
-        <div class="scan-config-item" data-id="${config.id}">
+        <div class="scan-config-item modal-list-item" data-id="${config.id}">
             <div class="config-info">
                 <strong class="system-name"></strong>
-                <span class="roms-folder"></span>
+                <!-- <span class="roms-folder"></span> -->
                 <span class="enabled"></span>
             </div>
             <div class="config-actions">
-                <button class="btn edit-config">✏️ Editar</button>
-                <button class="btn delete-config">🗑️ Eliminar</button>
-                <button class="btn run-scan">🔄 Escanear ahora</button>
+                <button class="btn btn-secondary edit-config"><i class="bi bi-pencil"></i> Edit</button>
+                <button class="btn btn-secondary delete-config"><i class="bi bi-trash"></i> Delete</button>
+                <button class="btn btn-secondary run-scan"><i class="bi bi-arrow-repeat"></i> Scan Now</button>
             </div>
         </div>
     </template>

@@ -1,15 +1,18 @@
 <dialog id="app-settings-modal">
-  <div class="modal-content">
-    <h2>StellarHub Settings</h2>
-    <div id="modal-loading" style="text-align:center; padding:2rem;">
-      <div class="spinner"></div>
-      <p>Loading settings...</p>
-    </div>
-    <div id="modal-form-container" style="display:none;">
-      <form id="settings-form">
+
+  <div id="modal-loading" style="text-align:center; padding:2rem;">
+    <div class="spinner"></div>
+    <p>Loading settings...</p>
+  </div>
+  <div id="modal-form-container" class="modal-form-container" style="display:none;">
+    <form id="settings-form">
+      <div class="form-title">
+        <h2>StellarHub Settings</h2>
+      </div>
+      <div class="form-content">
         <!-- //SGDB -->
         <div>
-          <label>
+          <label class="checkbox-label">
             <input type="checkbox" id="steamgriddb-enabled"> Enable SteamGridDB
           </label>
           <div class="form-group" id="steamgriddb-api-group">
@@ -38,7 +41,7 @@
 
         <div>
           <div class="form-group">
-            <label>
+            <label class="checkbox-label">
               <input type="checkbox" id="steam-enabled"> Enable Steam Integration
             </label>
             <label>Steam ApiKey</label>
@@ -61,16 +64,16 @@
         </div>
 
         <div class="form-group">
-          <label>
+          <label class="checkbox-label">
             <input type="checkbox" id="launch-fullscreen"> Start in fullscreen
-
           </label>
         </div>
-        <div class="modal-buttons">
-          <button class="btn btn-secondary" type="button" id="close-settings-modal">Cancelar</button>
-          <button class="btn btn-primary" type="submit">Guardar</button>
-        </div>
-      </form>
-    </div>
+      </div>
+      <div class="form-buttons">
+        <button class="btn btn-secondary" type="button" id="close-settings-modal">Cancelar</button>
+        <button class="btn btn-primary" type="submit">Guardar</button>
+      </div>
+    </form>
   </div>
+
 </dialog>

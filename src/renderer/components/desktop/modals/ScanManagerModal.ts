@@ -88,9 +88,9 @@ export class ScanManagerModal extends HTMLElement {
         if (!item) continue;
         item.setAttribute('data-id', config.id);
         item.querySelector('.system-name')!.textContent = config.systemName;
-        item.querySelector('.roms-folder')!.textContent = config.romsFolder;
+        // item.querySelector('.roms-folder')!.textContent = config.romsFolder;
         const enabledSpan = item.querySelector('.enabled')!;
-        enabledSpan.textContent = config.enabled ? '✅ Activado' : '❌ Desactivado';
+        enabledSpan.innerHTML = config.enabled ? '<i class="bi bi-check-lg"></i> Enabled' : '<i class="bi bi-x-lg"></i> Disabled';
         // Opcional: mostrar lastScanAt
         const lastScanSpan = item.querySelector('.last-scan');
         if (lastScanSpan && config.lastScanAt) {

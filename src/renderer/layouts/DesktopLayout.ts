@@ -7,6 +7,7 @@ import { AddCategoryModal } from '../components/desktop/modals/AddCategoryModal'
 import '../components/desktop/modals/AddCategoryModal';
 import '../components/desktop/modals/ScanManagerModal';
 import '../components/desktop/modals/AddGameModal';
+import '../components/desktop/modals/EditGameModal';
 import '../components/desktop/modals/RemoveGameModal';
 import '../components/desktop/modals/AppSettingsModal';
 import '../components/desktop/GameDetailsPanel';
@@ -17,6 +18,7 @@ import '../components/shared/GameCard';
 import '../utils/uiHelpers';
 
 import { AddGameModal } from '../components/desktop/modals/AddGameModal';
+import { EditGameModal } from '../components/desktop/modals/EditGameModal';
 import { ScanManagerModal } from '../components/desktop/modals/ScanManagerModal';
 import { AppSettingsModal } from '../components/desktop/modals/AppSettingsModal';
 import { GameDetailsPanel } from '../components/desktop/GameDetailsPanel';
@@ -95,6 +97,15 @@ export async function renderDesktopLayout(
             console.log("Escuchando evento: 'open-remove-game-modal'")
             const gameId = (e as CustomEvent)?.detail
             removeGameModal.open(gameId);
+        });
+
+        const editGameModal =
+            desktopLayout.querySelector('modal-edit-game') as EditGameModal;
+
+        mainContainer.addEventListener('open-edit-game-modal', (e) => {
+            console.log("Escuchando evento: 'open-remove-game-modal'")
+            const gameId = (e as CustomEvent)?.detail
+            editGameModal.open(gameId);
         });
 
         const scanManagerModal =
