@@ -1,6 +1,6 @@
 {
   "name": "stellarhub",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Lanzador de juegos para Linux",
   "main": "dist/main/main.js",
   "scripts": {
