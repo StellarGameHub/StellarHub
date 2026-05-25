@@ -1,5 +1,5 @@
 import { GameSource } from '../../../../shared/enums';
-import { AppSettings, Game } from '../../../../shared/types';
+import { AppSettings, Game, RomGame } from '../../../../shared/types';
 import { withButtonLoading } from '../../../utils/uiHelpers';
 import modalHtml from '/templates/modals/modal-edit-game.html?raw';
 
@@ -41,7 +41,7 @@ export class EditGameModal extends HTMLElement {
                         imageData: gameData.imageData
                     });
                     if (updateResult.success) {
-                        window.dispatchEvent(new CustomEvent('games-updated',{
+                        window.dispatchEvent(new CustomEvent('games-updated', {
                             bubbles: true,
                             composed: true,
                         }));
@@ -256,7 +256,17 @@ export class EditGameModal extends HTMLElement {
                     gameModeSelect.value = hasGameMode ? 'true' : 'false';
                 }
                 break;
-
+            case GameSource.ROM:
+                this.querySelector("#section-rom-game")?.classList.remove('display-none');
+                // Cargar datos específicos de ROM
+                const romDetails = (game as RomGame).romDetails;
+                const emulatorPathInput = this.querySelector('#emulatorPath') as HTMLInputElement;
+                if (emulatorPathInput) emulatorPathInput.value = romDetails.emulatorPath;
+                const launchArgumentsInput = this.querySelector('#romLaunchArguments') as HTMLInputElement;
+                if (launchArgumentsInput) launchArgumentsInput.value = romDetails.launchArguments;
+                const romPathInput = this.querySelector('#romPath') as HTMLInputElement;
+                if (romPathInput) romPathInput.value = romDetails.romPath;
+                break;
         }
 
 
@@ -334,6 +344,11 @@ export class EditGameModal extends HTMLElement {
                 enableMangoHud: raw.mangoHud === 'true',
                 enableGamescope: false,
                 environment: raw.gameMode === 'true' ? { GAMEMODERUN: '1' } : {},
+            },
+            romDetails: {
+                romPath: raw.romPath?.toString() ?? '',
+                emulatorPath: raw.emulatorPath?.toString() ?? '',
+                launchArguments: raw.romLaunchArguments?.toString() ?? '',
             },
             imageData: imageData,
         };

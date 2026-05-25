@@ -105,13 +105,18 @@ export function registerGameHandlers() {
         game.releaseDate = updates.releaseDate ?? game.releaseDate;
         game.genres = updates.genres ?? game.genres;
 
-        switch (gameSource) {
+        switch (game.source) {
             case GameSource.MANUAL:
+                const manualGame = game as ExecutableGame;
                 if (updates.launchConfig) {
-                    (game as ExecutableGame).launchConfig = { ...updates.launchConfig };
+                    manualGame.launchConfig = { ...updates.launchConfig };
                 }
                 break;
             case GameSource.ROM:
+                const romGame = game as RomGame;
+                romGame.romDetails.romPath = updates.romDetails?.romPath ?? romGame.romDetails.romPath;
+                romGame.romDetails.emulatorPath = updates.romDetails?.emulatorPath ?? romGame.romDetails.emulatorPath;
+                romGame.romDetails.launchArguments = updates.romDetails?.launchArguments ?? romGame.romDetails.launchArguments;
                 break;
         }
 
@@ -123,25 +128,15 @@ export function registerGameHandlers() {
             })
 
             if (imageData && imageData.buffer && imageData.ext) {
-                let imageType: SteamGridImageType | null = null;
-                switch (imageTypeString) {
-                    case "gridImage":
-                        imageType = SteamGridImageType.GRID
-                        break;
-                    case "wideGridImage":
-                        imageType = SteamGridImageType.WIDEGRID
-                        break;
-                    case "heroImage":
-                        imageType = SteamGridImageType.HERO
-                        break;
-                    case "logoImage":
-                        imageType = SteamGridImageType.LOGO
-                        break;
-                    case "iconImage":
-                        imageType = SteamGridImageType.ICON
-                        break;
-                }
-                if (imageType == null) continue;
+                const imageTypeMap: Record<string, SteamGridImageType> = {
+                    gridImage: SteamGridImageType.GRID,
+                    wideGridImage: SteamGridImageType.WIDEGRID,
+                    heroImage: SteamGridImageType.HERO,
+                    logoImage: SteamGridImageType.LOGO,
+                    iconImage: SteamGridImageType.ICON,
+                };
+                const imageType = imageTypeMap[imageTypeString];
+                if (!imageType) continue;
 
                 const buffer = Buffer.from(imageData.buffer);
                 const ext = imageData.ext;
