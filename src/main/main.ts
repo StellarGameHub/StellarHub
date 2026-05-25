@@ -49,7 +49,13 @@ app.whenReady().then(() => {
     // url.pathname será algo como "/images/grid/abc.png"
     const filePath = path.join(app.getPath('userData'), "images", decodeURIComponent(url.pathname));
     console.log(`Serving image from path: ${filePath}`);
-    return net.fetch('file://' + filePath);
+    return net.fetch('file://' + filePath, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
+    });
   });
 
   registerSteamHandlers();

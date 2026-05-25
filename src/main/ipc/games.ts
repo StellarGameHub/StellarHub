@@ -136,7 +136,7 @@ export function registerGameHandlers() {
                     iconImage: SteamGridImageType.ICON,
                 };
                 const imageType = imageTypeMap[imageTypeString];
-                if (!imageType) continue;
+                if (imageType == null) continue;
 
                 const buffer = Buffer.from(imageData.buffer);
                 const ext = imageData.ext;
@@ -145,7 +145,7 @@ export function registerGameHandlers() {
 
             }
         }
-
+        console.log("Saving game with updated data:", game);
         await saveGame(game);
         return { success: true };
     });

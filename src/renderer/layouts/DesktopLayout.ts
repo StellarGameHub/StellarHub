@@ -191,15 +191,13 @@ export async function renderDesktopLayout(
         // ACTUALIZAR JUEGOS
         // =========================
 
-        mainContainer.addEventListener('games-updated', async () => {
+        window.addEventListener('games-updated', async () => {
             console.log("Escuchando Evento: 'games-updated'")
-            await updateGames();
-            filterGames();
+            await updateGames();            
         });
 
         window.electronAPI.onGamesUpdated(async () => {
-            await updateGames();
-            filterGames();
+            await updateGames();            
         });
         window.electronAPI.onGameImagesUpdated(async () => {
             await updateGameImages();
@@ -270,10 +268,15 @@ function changeViewType(type: DesktopViewType) {
 }
 
 async function updateGames() {
-
+    console.log("Actualizando juegos en el escritorio...")
     const grid = document.querySelector('#ds-grid') as HTMLElement;
 
-    if (!grid) return;
+    const games =
+        await window.electronAPI.invoke('get-games-summary') as GameSummary[];
+
+    if (!grid || !games) return;
+
+    console.log(`Juegos obtenidos: ${games.length}`);
 
     // Limpiar DOM
     grid.innerHTML = '';
@@ -281,12 +284,9 @@ async function updateGames() {
     // Limpiar referencias
     gameCards.length = 0;
 
-    const games =
-        await window.electronAPI.invoke('get-games-summary') as GameSummary[];
-
     let cardStyle = GameCardStyle.PORTRAIT;
 
-    switch (localStorage.getItem('desktop-view-type')) {
+    switch (localStorage.getItem('desktop-view-type') ?? 'grid') {
 
         case 'wide':
             cardStyle = GameCardStyle.WIDE;
@@ -295,33 +295,39 @@ async function updateGames() {
         case 'list':
             cardStyle = GameCardStyle.LIST;
             break;
+        default:
+            cardStyle = GameCardStyle.PORTRAIT;
+            break;
     }
 
     games.forEach(game => {
 
+        console.log(`Agregando juego al escritorio: ${game.title} (ID: ${game.id})`)
+
         const card = document.createElement('game-card') as GameCard;
 
         card.setStyle(cardStyle);
-
         card.setGame(game);
 
         grid.appendChild(card);
 
         gameCards.push(card);
+
+        card.show();
     });
 
     // Restaurar selección
     if (currentSelectedId) {
 
         const selectedGameCard =
-            desktopLayout?.querySelector(
+            grid?.querySelector(
                 `game-card[data-game-id="${currentSelectedId}"]`
             ) as HTMLElement;
 
         if (selectedGameCard) {
             selectedGameCard.click();
         }
-    }
+    }    
 }
 
 async function updateGameImages() {
@@ -335,15 +341,15 @@ async function updateGameImages() {
         switch (localStorage.getItem('desktop-view-type')) {
 
             case 'wide':
-                if (gameCover && gcData?.gameImages.wideGrid) gameCover.src = gcData?.gameImages.wideGrid;
+                if (gameCover && gcData?.gameImages.wideGrid) gameCover.src = `stellarhub://${gcData?.gameImages.wideGrid}`;
                 break;
 
             case 'list':
-                if (gameCover && gcData?.gameImages.icon) gameCover.src = gcData?.gameImages.icon;
+                if (gameCover && gcData?.gameImages.icon) gameCover.src = `stellarhub://${gcData?.gameImages.icon}`;
                 break;
-            case 'grid':
-                if (gameCover && gcData?.gameImages.grid) gameCover.src = gcData?.gameImages.grid;
 
+            case 'grid':
+                if (gameCover && gcData?.gameImages.grid) gameCover.src = `stellarhub://${gcData?.gameImages.grid}`;
                 break;
         }
     });
